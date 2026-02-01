@@ -1,0 +1,101 @@
+package com.example.tasker.ui.components
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.tasker.R
+
+
+@Composable
+fun TaskUiItem(
+    id: Long,
+    number: Int,
+    task: String,
+    description: String?,
+    state: Boolean,
+    onStateChanged: (state: Boolean, id: Long) -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        AnimatedVisibility(visible = state) {
+            // completed, set green check icon
+            Icon(
+                painter = painterResource(R.drawable.outline_check_small_24),
+                contentDescription = null,
+                tint = Color.Green
+            )
+        }
+
+        if (!state) // if not completed, set task number
+            Text(
+                text = number.toString(),
+                fontStyle = FontStyle.Italic
+            )
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            Text(
+                text = task,
+                modifier = Modifier.basicMarquee(Int.MAX_VALUE),
+                style = if (state) TextStyle(textDecoration = TextDecoration.LineThrough) else TextStyle.Default // line through text if task completed
+            )
+
+            description?.let {
+                Text(
+                    text = it,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Light,
+                    modifier = Modifier.basicMarquee(Int.MAX_VALUE)
+                )
+            }
+        }
+
+        IconButton(onClick = {}) {
+            Icon(
+                painter = painterResource(R.drawable.outline_edit_24),
+                contentDescription = null
+            )
+        }
+
+        Checkbox(
+            checked = state,
+            onCheckedChange = { state ->
+                onStateChanged(state, id)
+                if (state) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            },
+            colors = CheckboxDefaults.colors(checkedColor = Color.Green) // green checkbox when task completed
+        )
+    }
+}
