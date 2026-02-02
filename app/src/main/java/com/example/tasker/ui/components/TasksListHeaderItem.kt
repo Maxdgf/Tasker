@@ -24,7 +24,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tasker.R
@@ -34,14 +33,17 @@ import java.time.format.DateTimeFormatter
 
 /**
  * Converts value to percent of max value.
+ *
  * @param value input value.
  * @param max max value.
+ *
  * @return calculated percent.
  */
 private fun calculatePercent(value: Int, max: Int) = value * 1f / max
 
 /**
  * Formats time millis to datetime.
+ *
  * @param time time millis.
  * @return datetime string.
  */
@@ -53,6 +55,7 @@ private fun formatLongToStringDatetime(time: Long): String {
 
 /**
  * Creates tasks list header item.
+ *
  * @param name name of list.
  * @param description description of list (optional).
  * @param tasksCount all tasks count in list.

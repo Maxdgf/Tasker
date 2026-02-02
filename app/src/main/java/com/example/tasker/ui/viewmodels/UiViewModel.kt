@@ -22,6 +22,8 @@ class UiViewModel : ViewModel() {
     var confirmationDeleteAllTasksListDialogState by mutableStateOf(false)
     var confirmationDeleteCurrentTasksListDialogState by mutableStateOf(false)
     var editTaskDialogState by mutableStateOf(false)
+    var editTaskContentState by mutableStateOf("")
+    var editTaskDescriptionState by mutableStateOf("")
 
     fun addTaskToList(content: String, description: String?) {
         _addedTasks.value += AddedTask(
@@ -40,4 +42,6 @@ class UiViewModel : ViewModel() {
     fun updateConfirmationDeleteAllTasksListDialogState(state: Boolean) { confirmationDeleteAllTasksListDialogState = state }
     fun updateConfirmationDeleteCurrentTasksListDialogState(state: Boolean) { confirmationDeleteCurrentTasksListDialogState = state }
     fun updateEditTaskDialogState(state: Boolean) { editTaskDialogState = state }
+    fun updateEditTaskContentState(text: String) { editTaskContentState = text }
+    fun updateEditTaskDescriptionState(text: String) { editTaskDescriptionState = text }
 }

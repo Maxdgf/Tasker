@@ -4,6 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,13 +20,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.tasker.R
 import com.example.tasker.databases.tasks_database.entities.TaskEntity
+import com.example.tasker.ui.components.ActionUiDialog
+import com.example.tasker.ui.components.SquaredUiButton
 import com.example.tasker.ui.components.TaskUiItem
+import com.example.tasker.ui.components.TextUiField
 import com.example.tasker.ui.navigation.NavigationRoutes
 import kotlinx.coroutines.delay
 
@@ -38,11 +45,12 @@ fun TasksListViewAppScreen(
     manageTasksListCompletionStateById: (Boolean) -> Unit,
     updateTaskByIdDialogState: Boolean,
     updateTaskByIdDialog: (Boolean) -> Unit,
-    updateTaskById: (content: String, description: String?, id: Long) -> Unit,
+    updateTaskById: (content: String, description: String?) -> Unit,
     editContent: String,
     updateEditContent: (String) -> Unit,
     editDescription: String,
     updateEditDescription: (String) -> Unit,
+    updateEditTaskId: (Long) -> Unit
 ) {
     // update completed tasks count when tasks list changing
     LaunchedEffect(tasksList) {
@@ -66,10 +74,68 @@ fun TasksListViewAppScreen(
                         )
                     }
                 },
-                title = { Text(text = "Tasks") }
+                title = { Text(text = "Tasks") },
+                actions = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(R.drawable.outline_list_alt_24),
+                            contentDescription = null
+                        )
+
+                        Text(
+                            text = tasksList.size.toString(),
+                            fontStyle = FontStyle.Italic
+                        )
+                    }
+                }
             )
         }
     ) { innerPadding ->
+        // edit task item dialog
+        ActionUiDialog(
+            state = updateTaskByIdDialogState,
+            onDismissRequestFunction = { updateTaskByIdDialog(false) }
+        ) {
+            Column(
+                modifier = Modifier.padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                TextUiField(
+                    value = editContent,
+                    onValueChange = { newValue -> updateEditContent(newValue) },
+                    placeholder = "Edit your task content..."
+                )
+
+                TextUiField(
+                    value = editDescription,
+                    onValueChange = { newValue -> updateEditDescription(newValue) },
+                    placeholder = "Edit your task content..."
+                )
+
+                Row {
+                    SquaredUiButton(
+                        onClick = {
+                            updateTaskByIdDialog(false)
+
+                            updateEditContent("")
+                            updateEditDescription("")
+                        }
+                    ) {
+                        Text(text = "cancel")
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    SquaredUiButton(onClick = {
+                        if (editContent.isNotEmpty()) {
+                            updateTaskById(editContent, if (editDescription.isNotEmpty()) editDescription else null)
+                            updateTaskByIdDialog(false)
+                        }
+                    }) { Text(text = "edit") }
+                }
+            }
+        }
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -84,7 +150,11 @@ fun TasksListViewAppScreen(
                     task = task.content,
                     description = task.description,
                     state = task.isCompleted,
-                    onStateChanged = onTaskStateChanged
+                    onStateChanged = onTaskStateChanged,
+                    updateEditDialogState = updateTaskByIdDialog,
+                    updateEditTaskId = updateEditTaskId,
+                    updateEditContent = updateEditContent,
+                    updateEditDescription = updateEditDescription
                 )
 
                 if (index < tasksList.lastIndex) HorizontalDivider()

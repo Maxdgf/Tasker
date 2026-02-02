@@ -93,7 +93,15 @@ fun TaskerAppRoot(
                     tasksList = allTasksById,
                     onTaskStateChanged = tasksViewModel::setTaskStateById,
                     setCompletedTasksCountById = tasksViewModel::setCompletedTasksCountById,
-                    manageTasksListCompletionStateById = tasksViewModel::manageTasksListCompletionStateById
+                    manageTasksListCompletionStateById = tasksViewModel::manageTasksListCompletionStateById,
+                    updateTaskByIdDialogState = uiViewModel.editTaskDialogState,
+                    updateTaskByIdDialog = uiViewModel::updateEditTaskDialogState,
+                    updateTaskById = tasksViewModel::updateTaskById,
+                    editContent = uiViewModel.editTaskContentState,
+                    updateEditContent = uiViewModel::updateEditTaskContentState,
+                    editDescription = uiViewModel.editTaskDescriptionState,
+                    updateEditDescription = uiViewModel::updateEditTaskDescriptionState,
+                    updateEditTaskId = tasksViewModel::setEditTaskId
                 )
             }
 

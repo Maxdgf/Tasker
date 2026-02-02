@@ -36,7 +36,11 @@ fun TaskUiItem(
     task: String,
     description: String?,
     state: Boolean,
-    onStateChanged: (state: Boolean, id: Long) -> Unit
+    onStateChanged: (state: Boolean, id: Long) -> Unit,
+    updateEditDialogState: (Boolean) -> Unit,
+    updateEditTaskId: (Long) -> Unit,
+    updateEditContent: (String) -> Unit,
+    updateEditDescription: (String) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
 
@@ -68,7 +72,6 @@ fun TaskUiItem(
         ) {
             Text(
                 text = task,
-                modifier = Modifier.basicMarquee(Int.MAX_VALUE),
                 style = if (state) TextStyle(textDecoration = TextDecoration.LineThrough) else TextStyle.Default // line through text if task completed
             )
 
@@ -76,18 +79,26 @@ fun TaskUiItem(
                 Text(
                     text = it,
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Light,
-                    modifier = Modifier.basicMarquee(Int.MAX_VALUE)
+                    fontWeight = FontWeight.Light
                 )
             }
         }
 
-        IconButton(onClick = {}) {
-            Icon(
-                painter = painterResource(R.drawable.outline_edit_24),
-                contentDescription = null
-            )
-        }
+        if (!state)
+            IconButton(
+                onClick = {
+                    updateEditDialogState(true)
+                    updateEditTaskId(id)
+
+                    updateEditContent(task)
+                    description?.let { updateEditDescription(it) }
+                }
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.outline_edit_24),
+                    contentDescription = null
+                )
+            }
 
         Checkbox(
             checked = state,

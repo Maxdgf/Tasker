@@ -21,6 +21,8 @@ class TasksViewModel @Inject constructor(private val tasksRepository: TasksRepos
     private val _taskId = MutableStateFlow<String?>(null)
     val taskId = _taskId.asStateFlow()
 
+    private val _editTaskId = MutableStateFlow<Long?>(null)
+
     val allTasksLists = tasksRepository.getAllTasks().stateIn(
         viewModelScope,
         SharingStarted.Lazily,
@@ -40,6 +42,7 @@ class TasksViewModel @Inject constructor(private val tasksRepository: TasksRepos
         )
 
     fun setTaskId(id: String) { _taskId.value = id }
+    fun setEditTaskId(id: Long) { _editTaskId.value = id }
 
     fun addTasksList(id: String, name: String, description: String?, tasksCount: Int) {
         viewModelScope.launch {
@@ -84,6 +87,14 @@ class TasksViewModel @Inject constructor(private val tasksRepository: TasksRepos
         viewModelScope.launch {
             _taskId.value?.let {
                 tasksRepository.manageTasksListCompletionStateById(state, it)
+            }
+        }
+    }
+
+    fun updateTaskById(content: String, description: String?) {
+        viewModelScope.launch {
+            _editTaskId.value?.let {
+                tasksRepository.updateTaskById(content, description, it)
             }
         }
     }
