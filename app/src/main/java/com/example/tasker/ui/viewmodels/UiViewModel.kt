@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import com.example.tasker.ui.viewmodels.data_models.AddedTask
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import java.util.UUID
 
 class UiViewModel : ViewModel() {
@@ -33,6 +34,13 @@ class UiViewModel : ViewModel() {
         )
     }
     fun clearTasksList() { _addedTasks.value = emptyList() }
+    fun deleteTaskById(taskId: String) {
+        _addedTasks.update { list ->
+            list.toMutableList().apply {
+                this.removeIf { task -> task.taskId == taskId }
+            }
+        }
+    }
     fun updateTaskName(text: String) { taskName = text }
     fun updateTaskDescription(text: String) { taskDescription = text }
 

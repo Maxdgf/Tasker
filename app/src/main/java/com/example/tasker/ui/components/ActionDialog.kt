@@ -24,7 +24,7 @@ fun ActionUiDialog(
     onDismissRequestFunction: () -> Unit,
     dialogContent: @Composable () -> Unit
 ) {
-    if (state) { // dialog is visible
+    if (state) // dialog is visible
         BasicAlertDialog(onDismissRequest = { onDismissRequestFunction() }) {
             Surface(
                 modifier = Modifier
@@ -34,5 +34,4 @@ fun ActionUiDialog(
                 tonalElevation = AlertDialogDefaults.TonalElevation
             ) { dialogContent() }
         }
-    }
 }

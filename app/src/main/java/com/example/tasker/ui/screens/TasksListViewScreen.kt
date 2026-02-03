@@ -33,12 +33,13 @@ import com.example.tasker.ui.components.SquaredUiButton
 import com.example.tasker.ui.components.TaskUiItem
 import com.example.tasker.ui.components.TextUiField
 import com.example.tasker.ui.navigation.NavigationRoutes
+import com.example.tasker.ui.navigation.Navigator
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasksListViewAppScreen(
-    navController: NavController,
+    navigator: Navigator,
     tasksList: List<TaskEntity>,
     onTaskStateChanged: (state: Boolean, id: Long) -> Unit,
     setCompletedTasksCountById: (count: Int) -> Unit,
@@ -67,7 +68,7 @@ fun TasksListViewAppScreen(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigate(NavigationRoutes.MainScreen.route) }) {
+                    IconButton(onClick = { navigator.navigateTo(NavigationRoutes.MainScreen.route) }) {
                         Icon(
                             painter = painterResource(R.drawable.outline_arrow_back_24),
                             contentDescription = null

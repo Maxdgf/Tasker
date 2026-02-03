@@ -1,7 +1,5 @@
 package com.example.tasker.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,32 +7,25 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -49,12 +40,13 @@ import com.example.tasker.ui.components.ActionUiDialog
 import com.example.tasker.ui.components.SquaredUiButton
 import com.example.tasker.ui.components.TasksListHeaderUiItem
 import com.example.tasker.ui.navigation.NavigationRoutes
+import com.example.tasker.ui.navigation.Navigator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainAppScreen(
     allTasksList: List<TasksListEntity>,
-    navController: NavController,
+    navigator: Navigator,
     setTaskId: (String) -> Unit,
     lazyListState: LazyListState,
     deleteAllTasksLists: () -> Unit,
@@ -76,7 +68,7 @@ fun MainAppScreen(
             // add tasks list floating button
             Box {
                 FloatingActionButton(
-                    onClick = { navController.navigate(NavigationRoutes.TasksListCreationScreen.route) },
+                    onClick = { navigator.navigateTo(NavigationRoutes.TasksListCreationScreen.route) },
                     shape = CircleShape,
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -209,7 +201,7 @@ fun MainAppScreen(
                         deadline = tasks.deadline,
                         onClick = {
                             setTaskId(tasks.tasksId)
-                            navController.navigate(NavigationRoutes.TasksListViewScreen.route)
+                            navigator.navigateTo(NavigationRoutes.TasksListViewScreen.route)
                         },
                         deleteAllTasksById = {
                             setTaskId(tasks.tasksId) // set current task id, if tasks list not completed show confirmation dialog, else delete now

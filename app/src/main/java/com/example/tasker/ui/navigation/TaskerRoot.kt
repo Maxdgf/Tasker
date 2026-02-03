@@ -31,6 +31,7 @@ fun TaskerAppRoot(
 
     val toaster = remember { Toaster(context) }
     val navController = rememberNavController()
+    val navigator = remember { Navigator(navController) }
     val tasksListsLazyState = rememberLazyListState()
 
     val allTasksList by tasksViewModel.allTasksLists.collectAsState()
@@ -46,7 +47,7 @@ fun TaskerAppRoot(
             composable(route = NavigationRoutes.MainScreen.route) {
                 MainAppScreen(
                     allTasksList = allTasksList,
-                    navController = navController,
+                    navigator = navigator,
                     setTaskId = tasksViewModel::setTaskId,
                     lazyListState = tasksListsLazyState,
                     deleteAllTasksLists = tasksViewModel::deleteAllData,
@@ -62,7 +63,7 @@ fun TaskerAppRoot(
             composable(route = NavigationRoutes.TasksListCreationScreen.route) {
                 TasksListCreationAppScreen(
                     toaster = toaster,
-                    navController = navController,
+                    navigator = navigator,
                     tasksListName = uiViewModel.tasksListName,
                     updateTasksListName = uiViewModel::updateTasksListName,
                     tasksListDescription = uiViewModel.tasksListDescription,
@@ -82,14 +83,20 @@ fun TaskerAppRoot(
                         }
 
                         // add tasks list header
-                        tasksViewModel.addTasksList(taskId, uiViewModel.tasksListName, uiViewModel.tasksListDescription, addedTasksList.count())
-                    }
+                        tasksViewModel.addTasksList(
+                            taskId,
+                            uiViewModel.tasksListName,
+                            uiViewModel.tasksListDescription,
+                            addedTasksList.count()
+                        )
+                    },
+                    deleteTask = uiViewModel::deleteTaskById
                 )
             }
 
             composable(route = NavigationRoutes.TasksListViewScreen.route) {
                 TasksListViewAppScreen(
-                    navController = navController,
+                    navigator = navigator,
                     tasksList = allTasksById,
                     onTaskStateChanged = tasksViewModel::setTaskStateById,
                     setCompletedTasksCountById = tasksViewModel::setCompletedTasksCountById,

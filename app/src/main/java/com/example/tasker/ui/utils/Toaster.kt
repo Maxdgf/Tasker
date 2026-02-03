@@ -6,6 +6,7 @@ import android.widget.Toast
 class Toaster(private val context: Context) {
     /**
      * Shows a toast message (long or short by time).
+     *
      * @param message message string.
      * @param isLong state show time toast.
      */
