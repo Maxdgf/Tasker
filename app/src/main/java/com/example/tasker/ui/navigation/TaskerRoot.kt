@@ -108,10 +108,10 @@ fun TaskerAppRoot(
                     updateEditContent = uiViewModel::updateEditTaskContentState,
                     editDescription = uiViewModel.editTaskDescriptionState,
                     updateEditDescription = uiViewModel::updateEditTaskDescriptionState,
-                    updateEditTaskId = tasksViewModel::setEditTaskId
+                    updateEditTaskId = tasksViewModel::setEditTaskId,
+                    updateTaskId = tasksViewModel::setTaskId
                 )
             }
-
         }
     }
 }

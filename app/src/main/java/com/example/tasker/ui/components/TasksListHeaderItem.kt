@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -96,7 +97,7 @@ fun TasksListHeaderUiItem(
                     text = name,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.basicMarquee(Int.MAX_VALUE),
-                    style = if (isCompleted) TextStyle(textDecoration = TextDecoration.LineThrough) else TextStyle.Default // // line through text if tasks list completed
+                    style = if (isCompleted) TextStyle(textDecoration = TextDecoration.LineThrough) else TextStyle.Default // line through text if tasks list completed
                 )
 
                 description?.let {
@@ -165,10 +166,23 @@ fun TasksListHeaderUiItem(
                 }
 
                 if (isCompleted)
-                    Text(
-                        text = "This tasks list completed. It will be automatically deleted within 5 minutes, but you can also delete it manually.",
-                        modifier = Modifier.basicMarquee(Int.MAX_VALUE)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.baseline_info_outline_24),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f) // set dim theme color
+                        )
+
+                        Text(
+                            text = "This tasks list completed. It will be automatically deleted within 5 minutes, but you can also delete it manually.",
+                            modifier = Modifier.basicMarquee(Int.MAX_VALUE),
+                            fontStyle = FontStyle.Italic,
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f) // set dim theme color
+                        )
+                    }
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {

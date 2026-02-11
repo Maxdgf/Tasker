@@ -28,7 +28,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tasker.R
 
-
+/**
+ * Creates a task item.
+ *
+ * @param id task item id.
+ * @param number task order number.
+ * @param task task text.
+ * @param description task description (optional).
+ * @param state completion state.
+ * @param onStateChanged on state changed function.
+ * @param updateEditDialogState update edit dialog state function.
+ * @param updateEditTaskId update current edit task id function.
+ * @param updateEditContent update edit task content state function.
+ * @param updateEditDescription update edit task description function.
+ */
 @Composable
 fun TaskUiItem(
     id: Long,
@@ -47,18 +60,20 @@ fun TaskUiItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(60.dp),
+            .height(60.dp)
+            .background(
+                color = if (state) Color.Green.copy(alpha = 0.5f) else Color.Transparent
+            ), // set green background if task completed
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        AnimatedVisibility(visible = state) {
-            // completed, set green check icon
+        if (state)
+            // if completed, set green check icon
             Icon(
                 painter = painterResource(R.drawable.outline_check_small_24),
                 contentDescription = null,
-                tint = Color.Green
+                tint = Color(0xFF4CAF50)
             )
-        }
 
         if (!state) // if not completed, set task number
             Text(

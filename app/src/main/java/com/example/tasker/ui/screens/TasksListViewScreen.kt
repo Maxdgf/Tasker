@@ -51,14 +51,15 @@ fun TasksListViewAppScreen(
     updateEditContent: (String) -> Unit,
     editDescription: String,
     updateEditDescription: (String) -> Unit,
-    updateEditTaskId: (Long) -> Unit
+    updateEditTaskId: (Long) -> Unit,
+    updateTaskId: (String?) -> Unit
 ) {
     // update completed tasks count when tasks list changing
     LaunchedEffect(tasksList) {
-        val allCompletedTasksCount = tasksList.count { task -> task.isCompleted }
-        setCompletedTasksCountById(allCompletedTasksCount)
+        val allCompletedTasksCount = tasksList.count { task -> task.isCompleted } // count completed tasks
+        setCompletedTasksCountById(allCompletedTasksCount) // set completed tasks count to state
 
-        if (allCompletedTasksCount == tasksList.count()) manageTasksListCompletionStateById(true)
+        if (allCompletedTasksCount == tasksList.size) manageTasksListCompletionStateById(true)
         else manageTasksListCompletionStateById(false)
 
         delay(10)
@@ -68,7 +69,12 @@ fun TasksListViewAppScreen(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = { navigator.navigateTo(NavigationRoutes.MainScreen.route) }) {
+                    IconButton(
+                        onClick = {
+                            navigator.navigateTo(NavigationRoutes.MainScreen.route)
+                            updateTaskId(null)
+                        }
+                    ) {
                         Icon(
                             painter = painterResource(R.drawable.outline_arrow_back_24),
                             contentDescription = null
@@ -117,7 +123,6 @@ fun TasksListViewAppScreen(
                     SquaredUiButton(
                         onClick = {
                             updateTaskByIdDialog(false)
-
                             updateEditContent("")
                             updateEditDescription("")
                         }
@@ -137,6 +142,7 @@ fun TasksListViewAppScreen(
             }
         }
 
+        // tasks lazy list
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()

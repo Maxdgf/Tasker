@@ -39,8 +39,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * Checks input user data.
+ *
+ * @param name name of tasks list.
+ * @param tasks all added tasks list.
+ *
+ * @return bool state.
+ */
 private fun checkData(name: String, tasks: List<AddedTask>) = name.isNotEmpty() && tasks.isNotEmpty()
 
+/**
+ * Creates tasks list creation screen.
+ * @param toaster utility for toast messages.
+ * @param navigator utility for screen navigation.
+ * @param tasksListName name of tasks list state.
+ * @param
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasksListCreationAppScreen(
@@ -59,8 +74,6 @@ fun TasksListCreationAppScreen(
     createTasksList: () -> Unit,
     deleteTask: (String) -> Unit
 ) {
-    var coroutineScope = rememberCoroutineScope()
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -128,7 +141,7 @@ fun TasksListCreationAppScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(0.8f),
                         verticalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
                         TextUiField(
@@ -149,7 +162,7 @@ fun TasksListCreationAppScreen(
                             addTaskToAddedTasksList(task, if (taskDescription.isNotEmpty()) taskDescription else null)
                         },
                         modifier = Modifier
-                            .weight(1f)
+                            .weight(0.2f)
                             .size(40.dp),
                         shape = CircleShape
                     ) {
@@ -163,17 +176,10 @@ fun TasksListCreationAppScreen(
 
             SquaredUiButton(
                 onClick = {
-                    if (checkData(tasksListName, addedTasksList))
-                        coroutineScope.launch {
-                            withContext(Dispatchers.IO) {
-                                createTasksList()
-                                withContext(Dispatchers.Main) {
-                                    toaster.showToast("Tasks list created!") // show toast message
-                                    navigator.navigateTo(NavigationRoutes.MainScreen.route) // navigate to main screen
-                                }
-                            }
-                        }
-                    else toaster.showToast("⚠️Little data!📃")
+                    if (checkData(tasksListName, addedTasksList)) {
+                        createTasksList()
+                        navigator.navigateTo(NavigationRoutes.MainScreen.route) // navigate to main screen
+                    } else toaster.showToast("⚠️Little data!📃")
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(

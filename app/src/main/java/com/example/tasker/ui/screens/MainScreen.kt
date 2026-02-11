@@ -1,23 +1,19 @@
 package com.example.tasker.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -33,7 +29,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+
 import com.example.tasker.R
 import com.example.tasker.databases.tasks_database.entities.TasksListEntity
 import com.example.tasker.ui.components.ActionUiDialog
@@ -64,47 +60,32 @@ fun MainAppScreen(
                 actions = {}
             )
         },
-        floatingActionButton = {
-            // add tasks list floating button
-            Box {
-                FloatingActionButton(
-                    onClick = { navigator.navigateTo(NavigationRoutes.TasksListCreationScreen.route) },
-                    shape = CircleShape,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(65.dp)
-                        .offset(y = 50.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.rounded_add_24),
-                        contentDescription = null
-                    )
-                }
-            }
-        },
-        floatingActionButtonPosition = FabPosition.Center,
         bottomBar = {
             BottomAppBar {
                 Row(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
-                        onClick = { updateConfirmationDeleteAllTasksListDialogState(true) },
-                        modifier = Modifier.weight(1f)
-                    ) {
+                    IconButton(onClick = { updateConfirmationDeleteAllTasksListDialogState(true) }) {
                         Icon(
                             painter = painterResource(R.drawable.outline_delete_forever_24),
                             contentDescription = null
                         )
                     }
 
-                    IconButton(
-                        onClick = {},
-                        modifier = Modifier.weight(1f)
-                    ) {
+                    IconButton(onClick = {}) {
                         Icon(
                             painter = painterResource(R.drawable.outline_query_stats_24),
+                            contentDescription = null
+                        )
+                    }
+
+                    IconButton(
+                        onClick = { navigator.navigateTo(NavigationRoutes.TasksListCreationScreen.route) },
+                        shape = CircleShape
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.rounded_add_24),
                             contentDescription = null
                         )
                     }
@@ -148,7 +129,7 @@ fun MainAppScreen(
             state = confirmationDeleteCurrentTasksListDialogState,
             onDismissRequestFunction = { updateConfirmationDeleteCurrentTasksListDialogState(false) }
         ) {
-            val currentTasksList = allTasksList.find { list -> list.tasksId == taskId }
+            val currentTasksList = allTasksList.find { list -> list.tasksId == taskId } // find tasks list by task id
             Column(modifier = Modifier.padding(10.dp)) {
                 Text(
                     text = buildAnnotatedString {

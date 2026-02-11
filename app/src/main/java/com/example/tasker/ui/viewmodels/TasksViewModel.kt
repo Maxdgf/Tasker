@@ -41,7 +41,7 @@ class TasksViewModel @Inject constructor(private val tasksRepository: TasksRepos
             emptyList()
         )
 
-    fun setTaskId(id: String) { _taskId.value = id }
+    fun setTaskId(id: String?) { _taskId.value = id }
     fun setEditTaskId(id: Long) { _editTaskId.value = id }
 
     fun addTasksList(id: String, name: String, description: String?, tasksCount: Int) {

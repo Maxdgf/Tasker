@@ -14,6 +14,7 @@ class Navigator(private val navController: NavController) {
                 saveState = true // save main screen state
             }
             launchSingleTop = true // preventing screen duplication in stack
+            restoreState = false // don't restore screen state
         }
     }
 }
