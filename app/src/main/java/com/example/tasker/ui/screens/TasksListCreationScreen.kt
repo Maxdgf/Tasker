@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,12 +22,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+
 import com.example.tasker.R
 import com.example.tasker.ui.components.ProtoTaskUiItem
 import com.example.tasker.ui.components.SquaredUiButton
@@ -35,9 +36,6 @@ import com.example.tasker.ui.navigation.NavigationRoutes
 import com.example.tasker.ui.navigation.Navigator
 import com.example.tasker.ui.utils.Toaster
 import com.example.tasker.ui.viewmodels.data_models.AddedTask
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * Checks input user data.
@@ -54,7 +52,6 @@ private fun checkData(name: String, tasks: List<AddedTask>) = name.isNotEmpty() 
  * @param toaster utility for toast messages.
  * @param navigator utility for screen navigation.
  * @param tasksListName name of tasks list state.
- * @param
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,7 +69,8 @@ fun TasksListCreationAppScreen(
     addedTasksList: List<AddedTask>,
     addTaskToAddedTasksList: (content: String, description: String?) -> Unit,
     createTasksList: () -> Unit,
-    deleteTask: (String) -> Unit
+    deleteTask: (String) -> Unit,
+    clearTasksList: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -157,19 +155,37 @@ fun TasksListCreationAppScreen(
                         )
                     }
 
-                    Button(
-                        onClick = {
-                            addTaskToAddedTasksList(task, if (taskDescription.isNotEmpty()) taskDescription else null)
-                        },
-                        modifier = Modifier
-                            .weight(0.2f)
-                            .size(40.dp),
-                        shape = CircleShape
+                    Column(
+                        modifier = Modifier.weight(0.2f),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Icon(
-                            painter = painterResource(R.drawable.rounded_add_24),
-                            contentDescription = null
-                        )
+                        Button(
+                            onClick = {
+                                addTaskToAddedTasksList(
+                                    task,
+                                    if (taskDescription.isNotEmpty()) taskDescription
+                                    else null
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.rounded_add_24),
+                                contentDescription = null
+                            )
+                        }
+
+                        Button(
+                            onClick = { clearTasksList() },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.outline_delete_24),
+                                contentDescription = null
+                            )
+                        }
                     }
                 }
             }

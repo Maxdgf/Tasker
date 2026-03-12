@@ -14,6 +14,5 @@ data class TasksListEntity(
     @ColumnInfo(name = "tasks_list_created_at") val time: Long = System.currentTimeMillis(), // created at time
     @ColumnInfo(name = "tasks_list_tasks_count") val tasksCount: Int, // all tasks count in list
     @ColumnInfo(name = "tasks_list_completed_tasks_count") val completedTasksCount: Int = 0, // all completed tasks count in list
-    @ColumnInfo(name = "tasks_list_is_completed_state") val isCompleted: Boolean = false, // is tasks list completed state
-    @ColumnInfo(name = "tasks_list_deadline") val deadline: Long? = null // tasks list deadline (optional)
+    @ColumnInfo(name = "tasks_list_is_completed_state") val isCompleted: Boolean = false // is tasks list completed state
 )

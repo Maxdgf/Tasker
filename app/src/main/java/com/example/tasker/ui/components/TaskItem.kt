@@ -2,7 +2,6 @@ package com.example.tasker.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
 import com.example.tasker.R
 
 /**
@@ -62,20 +62,24 @@ fun TaskUiItem(
             .fillMaxWidth()
             .height(60.dp)
             .background(
-                color = if (state) Color.Green.copy(alpha = 0.5f) else Color.Transparent
+                color =
+                    if (state) Color.Green.copy(alpha = 0.5f)
+                    else Color.Transparent
             ), // set green background if task completed
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        if (state)
+        AnimatedVisibility(visible = state) {
             // if completed, set green check icon
             Icon(
                 painter = painterResource(R.drawable.outline_check_small_24),
                 contentDescription = null,
                 tint = Color(0xFF4CAF50)
             )
+        }
 
-        if (!state) // if not completed, set task number
+        if (!state)
+            // if not completed, set task number
             Text(
                 text = number.toString(),
                 fontStyle = FontStyle.Italic
@@ -87,7 +91,9 @@ fun TaskUiItem(
         ) {
             Text(
                 text = task,
-                style = if (state) TextStyle(textDecoration = TextDecoration.LineThrough) else TextStyle.Default // line through text if task completed
+                style =
+                    if (state) TextStyle(textDecoration = TextDecoration.LineThrough)
+                    else TextStyle.Default // line through text if task completed
             )
 
             description?.let {
@@ -119,7 +125,8 @@ fun TaskUiItem(
             checked = state,
             onCheckedChange = { state ->
                 onStateChanged(state, id)
-                if (state) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                if (state)
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             },
             colors = CheckboxDefaults.colors(checkedColor = Color.Green) // green checkbox when task completed
         )

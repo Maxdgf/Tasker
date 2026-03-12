@@ -14,7 +14,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -63,7 +62,6 @@ private fun formatLongToStringDatetime(time: Long): String {
  * @param tasksCompletedCount completed tasks count in list.
  * @param createdAt tasks list creation time.
  * @param isCompleted is tasks list completed state.
- * @param deadline deadline of tasks list (optional).
  * @param onClick on click function.
  * @param deleteAllTasksById delete all tasks by id function.
  */
@@ -75,7 +73,6 @@ fun TasksListHeaderUiItem(
     tasksCompletedCount: Int,
     createdAt: Long,
     isCompleted: Boolean,
-    deadline: Long?,
     onClick: () -> Unit,
     deleteAllTasksById: () -> Unit
 ) {
@@ -97,7 +94,9 @@ fun TasksListHeaderUiItem(
                     text = name,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.basicMarquee(Int.MAX_VALUE),
-                    style = if (isCompleted) TextStyle(textDecoration = TextDecoration.LineThrough) else TextStyle.Default // line through text if tasks list completed
+                    style =
+                        if (isCompleted) TextStyle(textDecoration = TextDecoration.LineThrough)
+                        else TextStyle.Default // line through text if tasks list completed
                 )
 
                 description?.let {
@@ -125,23 +124,6 @@ fun TasksListHeaderUiItem(
                     )
                 }
 
-                deadline?.let {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.outline_event_upcoming_24),
-                            contentDescription = null
-                        )
-
-                        Text(
-                            text = formatLongToStringDatetime(it),
-                            fontStyle = FontStyle.Italic
-                        )
-                    }
-                }
-
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -149,7 +131,9 @@ fun TasksListHeaderUiItem(
                     Icon(
                         painter = painterResource(R.drawable.outline_check_small_24),
                         contentDescription = null,
-                        tint = if (isCompleted) Color.Green else LocalContentColor.current // if tasks list completed set green color tint to check icon, else default color
+                        tint =
+                            if (isCompleted) Color.Green
+                            else LocalContentColor.current // if tasks list completed set green color tint to check icon, else default color
                     )
 
                     Text(
@@ -160,45 +144,19 @@ fun TasksListHeaderUiItem(
                     val percent = calculatePercent(tasksCompletedCount, tasksCount)
                     LinearProgressIndicator(
                         progress = { percent },
-                        color = if (percent == 1f) Color.Green else Color.Red,
+                        color =
+                            if (percent == 1f) Color.Green
+                            else Color.Red,
                         drawStopIndicator = {} // without stop indicator
                     )
                 }
-
-                if (isCompleted)
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.baseline_info_outline_24),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f) // set dim theme color
-                        )
-
-                        Text(
-                            text = "This tasks list completed. It will be automatically deleted within 5 minutes, but you can also delete it manually.",
-                            modifier = Modifier.basicMarquee(Int.MAX_VALUE),
-                            fontStyle = FontStyle.Italic,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f) // set dim theme color
-                        )
-                    }
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                IconButton(onClick = {}) {
-                    Icon(
-                        painter = painterResource(R.drawable.outline_edit_24),
-                        contentDescription = null
-                    )
-                }
-
-                IconButton(onClick = { deleteAllTasksById() }) {
-                    Icon(
-                        painter = painterResource(R.drawable.outline_delete_24),
-                        contentDescription = null
-                    )
-                }
+            IconButton(onClick = { deleteAllTasksById() }) {
+                Icon(
+                    painter = painterResource(R.drawable.outline_delete_24),
+                    contentDescription = null
+                )
             }
         }
     }

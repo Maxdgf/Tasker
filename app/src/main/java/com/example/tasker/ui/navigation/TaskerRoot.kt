@@ -90,7 +90,8 @@ fun TaskerAppRoot(
                             addedTasksList.count()
                         )
                     },
-                    deleteTask = uiViewModel::deleteTaskById
+                    deleteTask = uiViewModel::deleteTaskById,
+                    clearTasksList = uiViewModel::clearTasksList
                 )
             }
 

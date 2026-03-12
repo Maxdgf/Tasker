@@ -1,6 +1,6 @@
 package com.example.tasker.ui.screens
 
-import androidx.compose.foundation.clickable
+import  androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -126,15 +126,17 @@ fun TasksListViewAppScreen(
                             updateEditContent("")
                             updateEditDescription("")
                         }
-                    ) {
-                        Text(text = "cancel")
-                    }
+                    ) { Text(text = "cancel") }
 
                     Spacer(modifier = Modifier.weight(1f))
 
                     SquaredUiButton(onClick = {
                         if (editContent.isNotEmpty()) {
-                            updateTaskById(editContent, if (editDescription.isNotEmpty()) editDescription else null)
+                            updateTaskById(
+                                editContent,
+                                if (editDescription.isNotEmpty()) editDescription
+                                else null
+                            )
                             updateTaskByIdDialog(false)
                         }
                     }) { Text(text = "edit") }
@@ -150,7 +152,10 @@ fun TasksListViewAppScreen(
             contentPadding = PaddingValues(horizontal = 5.dp),
             verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
-            itemsIndexed(items = tasksList) { index, task ->
+            itemsIndexed(
+                items = tasksList,
+                key = { index, task -> task.id }
+            ) { index, task ->
                 TaskUiItem(
                     id = task.id,
                     number = index + 1,
