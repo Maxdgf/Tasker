@@ -1,29 +1,31 @@
 package com.example.tasker.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -53,46 +55,80 @@ fun MainAppScreen(
     taskId: String?,
     deleteAllTasksById: () -> Unit,
     confirmationDeleteCurrentTasksListDialogState: Boolean,
-    updateConfirmationDeleteCurrentTasksListDialogState: (Boolean) -> Unit
+    updateConfirmationDeleteCurrentTasksListDialogState: (Boolean) -> Unit,
+    mainDropDownMenuState: Boolean,
+    updateMainDropdownMenuState: (Boolean) -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(R.string.app_name)) },
-                actions = {}
+                title = {
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                },
+                actions = {
+                    // main dropdown menu
+                    Box {
+                        // show main dropdown menu button
+                        IconButton(onClick = { updateMainDropdownMenuState(true) }) {
+                            Icon(
+                                painter = painterResource(R.drawable.baseline_more_vert_24),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = mainDropDownMenuState,
+                            onDismissRequest = { updateMainDropdownMenuState(false) }
+                        ) {
+                            // delete all button
+                            DropdownMenuItem(
+                                onClick = {
+                                    updateMainDropdownMenuState(false) // close dropdown menu
+                                    updateConfirmationDeleteAllTasksListDialogState(true)
+                                },
+                                text = {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.outline_delete_forever_24),
+                                            contentDescription = null
+                                        )
+
+                                        Text(text = "delete all")
+                                    }
+                                }
+                            )
+                        }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
             )
         },
-        bottomBar = {
-            BottomAppBar {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { updateConfirmationDeleteAllTasksListDialogState(true) }) {
-                        Icon(
-                            painter = painterResource(R.drawable.outline_delete_forever_24),
-                            contentDescription = null
-                        )
-                    }
-
-                    IconButton(
-                        onClick = { navigator.navigateTo(NavigationRoutes.TasksListCreationScreen.route) },
-                        shape = CircleShape,
-                        colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Green)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.rounded_add_24),
-                            contentDescription = null
-                        )
-                    }
-                }
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navigator.navigateTo(NavigationRoutes.TasksListCreationScreen.route) },
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.rounded_add_24),
+                    contentDescription = null
+                )
             }
         }
     ) { innerPadding ->
         // delete all tasks lists confirmation dialog
         ActionUiDialog(
             state = confirmationDeleteAllTasksListDialogState,
-            onDismissRequestFunction = { updateConfirmationDeleteAllTasksListDialogState(false) }
+            onDismissRequestFunction = { updateConfirmationDeleteAllTasksListDialogState(false) },
+            containerColor = MaterialTheme.colorScheme.error,
+            titleIcon = painterResource(R.drawable.outline_delete_forever_24),
+            titleText = "Delete all tasks lists"
         ) {
             Column(modifier = Modifier.padding(10.dp)) {
                 Text(
@@ -104,7 +140,13 @@ fun MainAppScreen(
                 )
 
                 Row {
-                    SquaredUiButton(onClick = { updateConfirmationDeleteAllTasksListDialogState(false) }) {
+                    SquaredUiButton(
+                        onClick = { updateConfirmationDeleteAllTasksListDialogState(false) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.onError,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
                         Text(text = "no")
                     }
 
@@ -114,7 +156,11 @@ fun MainAppScreen(
                         onClick = {
                             deleteAllTasksLists()
                             updateConfirmationDeleteAllTasksListDialogState(false)
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.onError,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
                     ) { Text(text = "yes") }
                 }
             }
@@ -123,7 +169,10 @@ fun MainAppScreen(
         // delete current tasks list confirmation dialog
         ActionUiDialog(
             state = confirmationDeleteCurrentTasksListDialogState,
-            onDismissRequestFunction = { updateConfirmationDeleteCurrentTasksListDialogState(false) }
+            onDismissRequestFunction = { updateConfirmationDeleteCurrentTasksListDialogState(false) },
+            containerColor = MaterialTheme.colorScheme.error,
+            titleIcon = painterResource(R.drawable.outline_delete_24),
+            titleText = "Delete tasks list"
         ) {
             val currentTasksList = allTasksList.find { list -> list.tasksId == taskId } // find tasks list by task id
             Column(modifier = Modifier.padding(10.dp)) {
@@ -131,13 +180,19 @@ fun MainAppScreen(
                     text = buildAnnotatedString {
                         append("Are you sure, want to ")
                         withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("delete") }
-                        append(" ${currentTasksList?.name}?")
+                        currentTasksList?.name?.let {  append(" $it?") } ?: append(" this tasks list?")
                         append(" ⚠️Completed ${currentTasksList?.completedTasksCount} / ${currentTasksList?.tasksCount} tasks!")
                     }
                 )
 
                 Row {
-                    SquaredUiButton(onClick = { updateConfirmationDeleteCurrentTasksListDialogState(false) }) {
+                    SquaredUiButton(
+                        onClick = { updateConfirmationDeleteCurrentTasksListDialogState(false) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.onError,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
                         Text(text = "no")
                     }
 
@@ -147,7 +202,11 @@ fun MainAppScreen(
                         onClick = {
                             deleteAllTasksById()
                             updateConfirmationDeleteCurrentTasksListDialogState(false)
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.onError,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
                     ) { Text(text = "yes") }
                 }
             }
@@ -176,13 +235,14 @@ fun MainAppScreen(
                         createdAt = tasks.time,
                         isCompleted = tasks.isCompleted,
                         onClick = {
-                            setTaskId(tasks.tasksId)
-                            navigator.navigateTo(NavigationRoutes.TasksListViewScreen.route)
+                            setTaskId(tasks.tasksId) // set current task id
+
+                            val arguments = tasks.description?.let { "/${tasks.name}?tasksListDescription=$it" } ?: "/${tasks.name}"
+                            navigator.navigateTo(NavigationRoutes.TasksListViewScreen.route + arguments)
                         },
                         deleteAllTasksById = {
                             setTaskId(tasks.tasksId) // set current task id, if tasks list not completed show confirmation dialog, else delete now
-                            if (!tasks.isCompleted) updateConfirmationDeleteCurrentTasksListDialogState(true)
-                            else deleteAllTasksById()
+                            updateConfirmationDeleteCurrentTasksListDialogState(true)
                         }
                     )
                 }

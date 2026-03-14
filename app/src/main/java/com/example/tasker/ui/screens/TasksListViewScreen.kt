@@ -1,5 +1,6 @@
 package com.example.tasker.ui.screens
 
+import androidx.compose.foundation.basicMarquee
 import  androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,16 +16,20 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.tasker.R
 import com.example.tasker.databases.tasks_database.entities.TaskEntity
@@ -39,6 +44,8 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasksListViewAppScreen(
+    name: String,
+    description: String?,
     navigator: Navigator,
     tasksList: List<TaskEntity>,
     onTaskStateChanged: (state: Boolean, id: Long) -> Unit,
@@ -81,27 +88,38 @@ fun TasksListViewAppScreen(
                         )
                     }
                 },
-                title = { Text(text = "Tasks") },
-                actions = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            painter = painterResource(R.drawable.outline_list_alt_24),
-                            contentDescription = null
+                title = {
+                    Column {
+                        // name
+                        Text(
+                            text = name,
+                            modifier = Modifier.basicMarquee(Int.MAX_VALUE),
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
 
-                        Text(
-                            text = tasksList.size.toString(),
-                            fontStyle = FontStyle.Italic
-                        )
+                        // description (optional)
+                        description?.let { text ->
+                            Text(
+                                text = text,
+                                fontWeight = FontWeight.Light,
+                                modifier = Modifier.basicMarquee(Int.MAX_VALUE),
+                                fontSize = 10.sp,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
             )
         }
     ) { innerPadding ->
         // edit task item dialog
         ActionUiDialog(
             state = updateTaskByIdDialogState,
-            onDismissRequestFunction = { updateTaskByIdDialog(false) }
+            onDismissRequestFunction = { updateTaskByIdDialog(false) },
+            titleIcon = painterResource(R.drawable.outline_edit_24),
+            titleText = "Edit task"
         ) {
             Column(
                 modifier = Modifier.padding(10.dp),
@@ -116,7 +134,7 @@ fun TasksListViewAppScreen(
                 TextUiField(
                     value = editDescription,
                     onValueChange = { newValue -> updateEditDescription(newValue) },
-                    placeholder = "Edit your task content..."
+                    placeholder = "Edit your task description(optional)..."
                 )
 
                 Row {

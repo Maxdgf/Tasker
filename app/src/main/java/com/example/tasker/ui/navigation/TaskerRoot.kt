@@ -11,9 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.tasker.ui.screens.MainAppScreen
 import com.example.tasker.ui.screens.TasksListCreationAppScreen
 import com.example.tasker.ui.screens.TasksListViewAppScreen
@@ -44,6 +46,7 @@ fun TaskerAppRoot(
             navController = navController,
             startDestination = NavigationRoutes.MainScreen.route
         ) {
+            // main screen
             composable(route = NavigationRoutes.MainScreen.route) {
                 MainAppScreen(
                     allTasksList = allTasksList,
@@ -57,9 +60,12 @@ fun TaskerAppRoot(
                     taskId = currentTaskId,
                     confirmationDeleteCurrentTasksListDialogState = uiViewModel.confirmationDeleteCurrentTasksListDialogState,
                     updateConfirmationDeleteCurrentTasksListDialogState = uiViewModel::updateConfirmationDeleteCurrentTasksListDialogState,
+                    mainDropDownMenuState = uiViewModel.mainDropdownMenuState,
+                    updateMainDropdownMenuState = uiViewModel::updateDropdownMenuState,
                 )
             }
 
+            // tasks list creation screen
             composable(route = NavigationRoutes.TasksListCreationScreen.route) {
                 TasksListCreationAppScreen(
                     toaster = toaster,
@@ -86,7 +92,7 @@ fun TaskerAppRoot(
                         tasksViewModel.addTasksList(
                             taskId,
                             uiViewModel.tasksListName,
-                            uiViewModel.tasksListDescription,
+                            if (uiViewModel.tasksListDescription.isNotEmpty()) uiViewModel.tasksListDescription else null,
                             addedTasksList.count()
                         )
                     },
@@ -95,8 +101,24 @@ fun TaskerAppRoot(
                 )
             }
 
-            composable(route = NavigationRoutes.TasksListViewScreen.route) {
+            // tasks list view screen
+            composable(
+                route = "${NavigationRoutes.TasksListViewScreen.route}/{tasksListName}?tasksListDescription={tasksListDescription}",
+                arguments = listOf(
+                    navArgument("tasksListName") { type = NavType.StringType }, // tasks list name
+                    navArgument("tasksListDescription") {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    } // tasks list description (nullable - optional)
+                )
+            ) { navBackStackEntry ->
+                val name = navBackStackEntry.arguments?.getString("tasksListName") // get name argument
+                val description = navBackStackEntry.arguments?.getString("tasksListDescription") // get description argument
+                
                 TasksListViewAppScreen(
+                    name = name ?: "Tasks",
+                    description = description,
                     navigator = navigator,
                     tasksList = allTasksById,
                     onTaskStateChanged = tasksViewModel::setTaskStateById,

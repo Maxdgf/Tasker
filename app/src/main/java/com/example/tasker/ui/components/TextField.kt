@@ -47,9 +47,9 @@ fun TextUiField(
             )
         },
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.onPrimary,
-            cursorColor = MaterialTheme.colorScheme.onPrimary
+            focusedBorderColor = MaterialTheme.colorScheme.onSecondary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+            cursorColor = MaterialTheme.colorScheme.onSecondary
         )
     )
 }

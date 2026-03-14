@@ -19,12 +19,12 @@ class UiViewModel : ViewModel() {
 
     var tasksListName by mutableStateOf("")
     var tasksListDescription by mutableStateOf("")
-    var currentLazyListPosition by mutableIntStateOf(0)
     var confirmationDeleteAllTasksListDialogState by mutableStateOf(false)
     var confirmationDeleteCurrentTasksListDialogState by mutableStateOf(false)
     var editTaskDialogState by mutableStateOf(false)
     var editTaskContentState by mutableStateOf("")
     var editTaskDescriptionState by mutableStateOf("")
+    var mainDropdownMenuState by mutableStateOf(false)
 
     fun addTaskToList(content: String, description: String?) {
         _addedTasks.value += AddedTask(
@@ -46,10 +46,10 @@ class UiViewModel : ViewModel() {
 
     fun updateTasksListName(text: String) { tasksListName = text }
     fun updateTasksListDescription(text: String) { tasksListDescription = text }
-    fun updateCurrentLazyListPosition(position: Int) { currentLazyListPosition = position }
     fun updateConfirmationDeleteAllTasksListDialogState(state: Boolean) { confirmationDeleteAllTasksListDialogState = state }
     fun updateConfirmationDeleteCurrentTasksListDialogState(state: Boolean) { confirmationDeleteCurrentTasksListDialogState = state }
     fun updateEditTaskDialogState(state: Boolean) { editTaskDialogState = state }
     fun updateEditTaskContentState(text: String) { editTaskContentState = text }
     fun updateEditTaskDescriptionState(text: String) { editTaskDescriptionState = text }
+    fun updateDropdownMenuState(state: Boolean) { mainDropdownMenuState = state }
 }
