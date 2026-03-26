@@ -37,10 +37,6 @@ import com.example.tasker.R
  * @param description task description (optional).
  * @param state completion state.
  * @param onStateChanged on state changed function.
- * @param updateEditDialogState update edit dialog state function.
- * @param updateEditTaskId update current edit task id function.
- * @param updateEditContent update edit task content state function.
- * @param updateEditDescription update edit task description function.
  */
 @Composable
 fun TaskUiItem(
@@ -50,10 +46,8 @@ fun TaskUiItem(
     description: String?,
     state: Boolean,
     onStateChanged: (state: Boolean, id: Long) -> Unit,
-    updateEditDialogState: (Boolean) -> Unit,
-    updateEditTaskId: (Long) -> Unit,
-    updateEditContent: (String) -> Unit,
-    updateEditDescription: (String) -> Unit
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
 
@@ -105,14 +99,21 @@ fun TaskUiItem(
             }
         }
 
-        if (!state)
+        if (!state) {
             IconButton(
                 onClick = {
-                    updateEditDialogState(true)
-                    updateEditTaskId(id)
+                    onDelete()
+                }
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.outline_delete_24),
+                    contentDescription = null
+                )
+            }
 
-                    updateEditContent(task)
-                    description?.let { updateEditDescription(it) }
+            IconButton(
+                onClick = {
+                    onEdit()
                 }
             ) {
                 Icon(
@@ -120,6 +121,7 @@ fun TaskUiItem(
                     contentDescription = null
                 )
             }
+        }
 
         Checkbox(
             checked = state,

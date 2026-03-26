@@ -23,6 +23,9 @@ interface TasksDao {
     @Query("SELECT * FROM tasks_list_table WHERE task_id = :id")
     fun getAllTasksById(id: String): Flow<List<TaskEntity>>
 
+    @Query("SELECT * FROM tasks_headers_table WHERE id = :id")
+    fun getTasksListById(id: Long): Flow<TasksListEntity>
+
     @Query("UPDATE tasks_list_table SET task_is_completed = :state WHERE id = :id")
     suspend fun setStateToTaskById(state: Boolean, id: Long)
 
@@ -46,6 +49,9 @@ interface TasksDao {
 
     @Query("DELETE FROM tasks_list_table WHERE task_id = :id")
     suspend fun deleteTasksById(id: String)
+
+    @Query("DELETE FROM tasks_list_table WHERE id = :id")
+    suspend fun deleteTaskById(id: Long)
 
     @Transaction
     suspend fun deleteAllData() {

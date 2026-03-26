@@ -9,6 +9,8 @@ import javax.inject.Inject
 class TasksRepositoryImpl @Inject constructor(private val tasksDao: TasksDao) : TasksRepository {
     override fun getAllTasks(): Flow<List<TasksListEntity>> = tasksDao.getAllTasksLists()
 
+    override fun getTasksListById(id: Long): Flow<TasksListEntity> = tasksDao.getTasksListById(id)
+
     override suspend fun addTasksList(tasksList: TasksListEntity) = tasksDao.addTasksList(tasksList)
 
     override suspend fun addTask(task: TaskEntity) = tasksDao.addTask(task)
@@ -29,6 +31,8 @@ class TasksRepositoryImpl @Inject constructor(private val tasksDao: TasksDao) : 
         description: String?,
         id: Long
     ) = tasksDao.updateTaskById(content, description, id)
+
+    override suspend fun deleteTaskById(id: Long) = tasksDao.deleteTaskById(id)
 
     override suspend fun deleteAllData() = tasksDao.deleteAllData()
 

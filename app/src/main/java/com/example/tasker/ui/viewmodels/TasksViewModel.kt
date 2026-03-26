@@ -1,5 +1,6 @@
 package com.example.tasker.ui.viewmodels
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tasker.databases.tasks_database.entities.TaskEntity
@@ -7,9 +8,8 @@ import com.example.tasker.databases.tasks_database.entities.TasksListEntity
 import com.example.tasker.databases.tasks_database.repository.TasksRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
@@ -17,17 +17,35 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TasksViewModel @Inject constructor(private val tasksRepository: TasksRepository) : ViewModel() {
-    private val _taskId = MutableStateFlow<String?>(null)
-    val taskId = _taskId.asStateFlow()
+class TasksViewModel @Inject constructor(
+    private val tasksRepository: TasksRepository,
+    private val savedStateHandle: SavedStateHandle
+) : ViewModel() {
+    companion object {
+        private const val CURRENT_TASKS_LIST_ID_KEY = "currentTasksListId"
+        private const val CURRENT_TASK_ID_KEY = "currentTaskId"
+    }
 
-    private val _editTaskId = MutableStateFlow<Long?>(null)
+    private val _taskId: StateFlow<String?> = savedStateHandle.getStateFlow(CURRENT_TASK_ID_KEY, null)
+    private val _tasksListId: StateFlow<Long?> = savedStateHandle.getStateFlow(CURRENT_TASKS_LIST_ID_KEY, null)
 
     val allTasksLists = tasksRepository.getAllTasks().stateIn(
         viewModelScope,
         SharingStarted.Lazily,
         emptyList()
     )
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val tasksListById = _tasksListId
+        .filterNotNull()
+        .flatMapLatest { id ->
+            tasksRepository.getTasksListById(id)
+        }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            null
+        )
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val allTasksById = _taskId
@@ -37,12 +55,12 @@ class TasksViewModel @Inject constructor(private val tasksRepository: TasksRepos
         }
         .stateIn(
             viewModelScope,
-            SharingStarted.Lazily,
+            SharingStarted.WhileSubscribed(5000),
             emptyList()
         )
 
-    fun setTaskId(id: String?) { _taskId.value = id }
-    fun setEditTaskId(id: Long) { _editTaskId.value = id }
+    fun setTasks(id: String) { savedStateHandle[CURRENT_TASK_ID_KEY] = id }
+    fun setTasksList(id: Long) { savedStateHandle[CURRENT_TASKS_LIST_ID_KEY] = id }
 
     fun addTasksList(id: String, name: String, description: String?, tasksCount: Int) {
         viewModelScope.launch {
@@ -75,27 +93,27 @@ class TasksViewModel @Inject constructor(private val tasksRepository: TasksRepos
         }
     }
 
-    fun setCompletedTasksCountById(count: Int) {
+    fun setCompletedTasksCountById(id: String, count: Int) {
         viewModelScope.launch {
-            _taskId.value?.let {
-                tasksRepository.setCompletedTasksCountById(count, it)
-            }
+            tasksRepository.setCompletedTasksCountById(count, id)
         }
     }
 
-    fun manageTasksListCompletionStateById(state: Boolean) {
+    fun manageTasksListCompletionStateById(id: String, state: Boolean) {
         viewModelScope.launch {
-            _taskId.value?.let {
-                tasksRepository.manageTasksListCompletionStateById(state, it)
-            }
+            tasksRepository.manageTasksListCompletionStateById(state, id)
         }
     }
 
-    fun updateTaskById(content: String, description: String?) {
+    fun updateTaskById(id: Long, content: String, description: String?) {
         viewModelScope.launch {
-            _editTaskId.value?.let {
-                tasksRepository.updateTaskById(content, description, it)
-            }
+            tasksRepository.updateTaskById(content, description, id)
+        }
+    }
+
+    fun deleteTaskById(id: Long) {
+        viewModelScope.launch {
+            tasksRepository.deleteTaskById(id)
         }
     }
 
@@ -105,11 +123,9 @@ class TasksViewModel @Inject constructor(private val tasksRepository: TasksRepos
         }
     }
 
-    fun deleteAllTasksById() {
+    fun deleteAllTasksById(id: String) {
         viewModelScope.launch {
-            _taskId.value?.let {
-                tasksRepository.deleteAllTasksById(it)
-            }
+            tasksRepository.deleteAllTasksById(id)
         }
     }
 }

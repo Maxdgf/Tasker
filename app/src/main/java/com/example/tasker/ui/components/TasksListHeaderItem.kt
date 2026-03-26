@@ -16,6 +16,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,28 +31,6 @@ import com.example.tasker.R
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-
-/**
- * Converts value to percent of max value.
- *
- * @param value input value.
- * @param max max value.
- *
- * @return calculated percent.
- */
-private fun calculatePercent(value: Int, max: Int) = value * 1f / max
-
-/**
- * Formats time millis to datetime.
- *
- * @param time time millis.
- * @return datetime string.
- */
-private fun formatLongToStringDatetime(time: Long): String {
-    val instant = Instant.ofEpochMilli(time)
-    val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss").withZone(ZoneId.systemDefault())
-    return formatter.format(instant)
-}
 
 /**
  * Creates tasks list header item.
@@ -76,6 +55,28 @@ fun TasksListHeaderUiItem(
     onClick: () -> Unit,
     deleteAllTasksById: () -> Unit
 ) {
+    /**
+     * Converts value to percent of max value.
+     * @return calculated percent.
+     */
+    val completionPercent: (Int, Int) -> Float = remember {
+        { value, max ->
+            value.toFloat() / max
+        }
+    }
+
+    /**
+     * Formats time millis to datetime.
+     * @return datetime string.
+     */
+    val stringDateTimeFromLong: (Long) -> String = remember {
+        { millis: Long ->
+            val instant = Instant.ofEpochMilli(millis)
+            val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss").withZone(ZoneId.systemDefault())
+            formatter.format(instant)
+        }
+    }
+
     Card(elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)) {
         Row(
             modifier = Modifier
@@ -118,7 +119,7 @@ fun TasksListHeaderUiItem(
                     )
 
                     Text(
-                        text = formatLongToStringDatetime(createdAt),
+                        text = stringDateTimeFromLong(createdAt),
                         fontStyle = FontStyle.Italic,
                         fontSize = 15.sp
                     )
@@ -141,7 +142,7 @@ fun TasksListHeaderUiItem(
                         fontSize = 12.sp
                     )
 
-                    val percent = calculatePercent(tasksCompletedCount, tasksCount)
+                    val percent = completionPercent(tasksCompletedCount, tasksCount)
                     LinearProgressIndicator(
                         progress = { percent },
                         color =
