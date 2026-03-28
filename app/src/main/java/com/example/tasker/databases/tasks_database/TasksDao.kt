@@ -38,6 +38,9 @@ interface TasksDao {
     @Query("UPDATE tasks_list_table SET task_content = :content, task_description = :description WHERE id = :id")
     suspend fun updateTaskById(content: String, description: String?, id: Long)
 
+    @Query("UPDATE tasks_headers_table SET tasks_list_tasks_count = :count WHERE id = :id")
+    suspend fun setAllTasksCountById(id: Long, count: Int)
+
     @Query("DELETE FROM tasks_headers_table")
     suspend fun deleteAllTasksHeadersList()
 

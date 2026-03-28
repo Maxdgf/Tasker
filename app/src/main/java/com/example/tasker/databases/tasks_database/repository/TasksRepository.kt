@@ -14,6 +14,7 @@ interface TasksRepository {
     suspend fun setCompletedTasksCountById(count: Int, id: String)
     suspend fun manageTasksListCompletionStateById(state: Boolean, id: String)
     suspend fun updateTaskById(content: String, description: String?, id: Long)
+    suspend fun setAllTasksCountById(id: Long, count: Int)
     suspend fun deleteTaskById(id: Long)
     suspend fun deleteAllData()
     suspend fun deleteAllTasksById(id: String)

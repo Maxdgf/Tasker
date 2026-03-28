@@ -32,6 +32,8 @@ class TasksRepositoryImpl @Inject constructor(private val tasksDao: TasksDao) : 
         id: Long
     ) = tasksDao.updateTaskById(content, description, id)
 
+    override suspend fun setAllTasksCountById(id: Long, count: Int) = tasksDao.setAllTasksCountById(id, count)
+
     override suspend fun deleteTaskById(id: Long) = tasksDao.deleteTaskById(id)
 
     override suspend fun deleteAllData() = tasksDao.deleteAllData()

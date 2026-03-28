@@ -72,7 +72,9 @@ fun TasksListHeaderUiItem(
     val stringDateTimeFromLong: (Long) -> String = remember {
         { millis: Long ->
             val instant = Instant.ofEpochMilli(millis)
-            val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss").withZone(ZoneId.systemDefault())
+            val formatter = DateTimeFormatter
+                .ofPattern("dd.MM.yyyy HH:mm:ss")
+                .withZone(ZoneId.systemDefault())
             formatter.format(instant)
         }
     }

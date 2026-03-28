@@ -111,6 +111,12 @@ class TasksViewModel @Inject constructor(
         }
     }
 
+    fun setAllTasksCountById(id: Long, count: Int) {
+        viewModelScope.launch {
+            tasksRepository.setAllTasksCountById(id, count)
+        }
+    }
+
     fun deleteTaskById(id: Long) {
         viewModelScope.launch {
             tasksRepository.deleteTaskById(id)

@@ -60,23 +60,34 @@ fun TasksListViewAppScreen(
     var editDescription by rememberSaveable { mutableStateOf("") }
     var updateTaskByIdDialogState by rememberSaveable { mutableStateOf(false) }
     var deleteTaskByIdDialogState by rememberSaveable { mutableStateOf(false) }
+    var isScreenHasJustStarted by rememberSaveable { mutableStateOf(true) }
 
     val tasksList by tasksViewModel.allTasksById.collectAsState()
     val tasksListHeader by tasksViewModel.tasksListById.collectAsState()
 
     // update completed tasks count when tasks list changing
     LaunchedEffect(tasksList) {
-        val id = taskId ?: return@LaunchedEffect
+        // check, is screen has just started
+        // ------------------------------------------------------------------
+        // This boolean flag prevents the task list data from being
+        // overwritten in the database when the LaunchedEffect
+        // is initially launched (the first time the composition is entered).
+        if (!isScreenHasJustStarted) {
+            val id = taskId ?: return@LaunchedEffect
 
-        val allCompletedTasksCount = tasksList.count { task -> task.isCompleted } // count completed tasks
-        tasksViewModel.setCompletedTasksCountById(id, allCompletedTasksCount) // set completed tasks count to state
+            val allCompletedTasksCount = tasksList.count { task -> task.isCompleted } // count completed tasks
+            tasksViewModel.setCompletedTasksCountById(
+                id,
+                allCompletedTasksCount
+            ) // set completed tasks count to state
 
-        if (allCompletedTasksCount == tasksList.size)
-            tasksViewModel.manageTasksListCompletionStateById(id, true)
-        else
-            tasksViewModel.manageTasksListCompletionStateById(id, false)
+            if (allCompletedTasksCount == tasksList.size)
+                tasksViewModel.manageTasksListCompletionStateById(id, true)
+            else
+                tasksViewModel.manageTasksListCompletionStateById(id, false)
 
-        delay(10)
+            delay(10)
+        } else isScreenHasJustStarted = false
     }
 
     LaunchedEffect(Unit) {
@@ -161,6 +172,8 @@ fun TasksListViewAppScreen(
                 SquaredUiButton(
                     onClick = {
                         currentTaskId?.let { tasksViewModel.deleteTaskById(it) }
+                        // update all tasks count
+                        tasksListId?.let { tasksViewModel.setAllTasksCountById(it, tasksList.size - 1) }
                         deleteTaskByIdDialogState = false
                     },
                     colors = ButtonDefaults.buttonColors(
