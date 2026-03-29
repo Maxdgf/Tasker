@@ -4,7 +4,7 @@
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-purple)
 ![Min Sdk](https://img.shields.io/badge/Min%20Sdk-26-green)
 
-Android app for creating to-do lists and tracking completed tasks.
+Android app for creating 📝to-do lists and tracking completed tasks.
 
 ## 🖼️Gallery(in light and dark themes)
 
@@ -24,3 +24,6 @@ Android app for creating to-do lists and tracking completed tasks.
         </td>
     </tr>
 </table>
+
+## 🔃Android Versions
+Android **8.0** and later
