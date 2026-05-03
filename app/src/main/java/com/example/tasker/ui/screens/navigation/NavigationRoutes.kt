@@ -1,4 +1,4 @@
-package com.example.tasker.ui.navigation
+package com.example.tasker.ui.screens.navigation
 
 sealed class NavigationRoutes(val route: String) {
     object MainScreen: NavigationRoutes("main_screen") // main screen route

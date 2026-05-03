@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -79,18 +80,23 @@ fun TasksListHeaderUiItem(
         }
     }
 
-    Card(elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)) {
+    Card(
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(170.dp)
+    ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(170.dp)
-                .padding(5.dp)
+                .fillMaxSize()
                 .clickable(onClick = { onClick() }),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Column(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(

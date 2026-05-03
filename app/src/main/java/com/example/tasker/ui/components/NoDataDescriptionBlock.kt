@@ -15,13 +15,14 @@ import androidx.compose.ui.text.font.FontWeight
  */
 @Composable
 fun NoDataUiDescriptionBlock(
-    description: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    description: String
 ) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
+        // dim color by current theme
         val color =
             if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.5f)
             else Color.Black.copy(alpha = 0.5f)

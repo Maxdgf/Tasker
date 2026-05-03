@@ -10,7 +10,7 @@ import com.example.tasker.databases.tasks_database.entities.TasksListEntity
         TasksListEntity::class,
         TaskEntity::class
     ], // entities
-    version = 2, // db version index
+    version = 4, // db version index
     exportSchema = false
 )
 abstract class TasksDatabase : RoomDatabase() {

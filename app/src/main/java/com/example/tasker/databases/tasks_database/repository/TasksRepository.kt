@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface TasksRepository {
     fun getAllTasks(): Flow<List<TasksListEntity>>
-    fun getTasksListById(id: Long): Flow<TasksListEntity>
+    fun getTasksListById(id: String): Flow<TasksListEntity?>
     suspend fun addTasksList(tasksList: TasksListEntity)
     suspend fun addTask(taskEntity: TaskEntity)
     fun getAllTasksById(id: String): Flow<List<TaskEntity>>
@@ -14,7 +14,7 @@ interface TasksRepository {
     suspend fun setCompletedTasksCountById(count: Int, id: String)
     suspend fun manageTasksListCompletionStateById(state: Boolean, id: String)
     suspend fun updateTaskById(content: String, description: String?, id: Long)
-    suspend fun setAllTasksCountById(id: Long, count: Int)
+    suspend fun setAllTasksCountById(id: String, count: Int)
     suspend fun deleteTaskById(id: Long)
     suspend fun deleteAllData()
     suspend fun deleteAllTasksById(id: String)

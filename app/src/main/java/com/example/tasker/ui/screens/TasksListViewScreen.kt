@@ -35,35 +35,42 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.delay
+
 import com.example.tasker.R
+import com.example.tasker.databases.tasks_database.entities.TaskEntity
 import com.example.tasker.ui.components.ActionUiDialog
+import com.example.tasker.ui.components.LoadingUiBlock
+import com.example.tasker.ui.components.NoDataUiDescriptionBlock
 import com.example.tasker.ui.components.SquaredUiButton
 import com.example.tasker.ui.components.TaskUiItem
 import com.example.tasker.ui.components.TextUiField
-import com.example.tasker.ui.navigation.NavigationRoutes
-import com.example.tasker.ui.navigation.Navigator
+import com.example.tasker.ui.screens.navigation.NavigationRoutes
+import com.example.tasker.ui.states.TasksListDataResult
+import com.example.tasker.ui.states.TasksResult
 import com.example.tasker.ui.viewmodels.TasksViewModel
-import kotlinx.coroutines.delay
+import com.example.tasker.ui.viewmodels.screens.TasksListViewScreenViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TasksListViewAppScreen(
-    navigator: Navigator,
-    tasksListId: Long?,
+private fun TasksListView(
+    paddingValues: PaddingValues,
     taskId: String?,
-    onTaskStateChanged: (state: Boolean, id: Long) -> Unit,
-    tasksViewModel: TasksViewModel = hiltViewModel()
+    tasksList: List<TaskEntity>,
+    onTaskStateChanged: (Boolean, Long) -> Unit,
+    onDeleteTaskById: (Long) -> Unit,
+    onSetAllTasksCountById: (String, Int) -> Unit,
+    onUpdateTaskById: (Long, String, String?) -> Unit,
+    onSetCompletedTasksCountById: (String, Int) -> Unit,
+    onManageTasksListCompletionStateById: (String, Boolean) -> Unit
 ) {
-    var editContent by rememberSaveable { mutableStateOf("") }
-    var currentTaskId: Long? by rememberSaveable { mutableStateOf(null) }
-    var editDescription by rememberSaveable { mutableStateOf("") }
+    val tasksState: TasksListViewScreenViewModel = viewModel()
+
+    var currentId: Long? by rememberSaveable { mutableStateOf(0L) }
+    var currentTaskId: String? by rememberSaveable { mutableStateOf(null) }
     var updateTaskByIdDialogState by rememberSaveable { mutableStateOf(false) }
     var deleteTaskByIdDialogState by rememberSaveable { mutableStateOf(false) }
-    var isScreenHasJustStarted by rememberSaveable { mutableStateOf(true) }
-
-    val tasksList by tasksViewModel.allTasksById.collectAsState()
-    val tasksListHeader by tasksViewModel.tasksListById.collectAsState()
+    var isScreenHasJustStarted by rememberSaveable { mutableStateOf(false) }
 
     // update completed tasks count when tasks list changing
     LaunchedEffect(tasksList) {
@@ -76,26 +83,191 @@ fun TasksListViewAppScreen(
             val id = taskId ?: return@LaunchedEffect
 
             val allCompletedTasksCount = tasksList.count { task -> task.isCompleted } // count completed tasks
-            tasksViewModel.setCompletedTasksCountById(
+            onSetCompletedTasksCountById(
                 id,
                 allCompletedTasksCount
             ) // set completed tasks count to state
 
             if (allCompletedTasksCount == tasksList.size)
-                tasksViewModel.manageTasksListCompletionStateById(id, true)
+                onManageTasksListCompletionStateById(id, true)
             else
-                tasksViewModel.manageTasksListCompletionStateById(id, false)
+                onManageTasksListCompletionStateById(id, false)
 
             delay(10)
         } else isScreenHasJustStarted = false
     }
 
-    LaunchedEffect(Unit) {
-        val id1 = taskId ?: return@LaunchedEffect
-        val id2 = tasksListId ?: return@LaunchedEffect
+    ActionUiDialog(
+        state = deleteTaskByIdDialogState,
+        onDismissRequestFunction = { deleteTaskByIdDialogState = false },
+        containerColor = MaterialTheme.colorScheme.error,
+        titleIcon = painterResource(R.drawable.outline_delete_24),
+        titleText = "Delete Task"
+    ) {
+        Text(
+            text = buildAnnotatedString {
+                append("Are you sure, want to ")
+                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("delete") }
+                append(" this tasks list?")
+            }
+        )
 
-        tasksViewModel.setTasks(id1)
-        tasksViewModel.setTasksList(id2)
+        Row {
+            SquaredUiButton(
+                onClick = { deleteTaskByIdDialogState = false },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.onError,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Text(text = "no")
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            SquaredUiButton(
+                onClick = {
+                    currentTaskId?.let { onSetAllTasksCountById(it, tasksList.size - 1) }
+                    currentId?.let { onDeleteTaskById(it) }
+
+                    deleteTaskByIdDialogState = false
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.onError,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) { Text(text = "yes") }
+        }
+    }
+
+    // edit task item dialog
+    ActionUiDialog(
+        state = updateTaskByIdDialogState,
+        onDismissRequestFunction = { updateTaskByIdDialogState = false },
+        titleIcon = painterResource(R.drawable.outline_edit_24),
+        titleText = "Edit task"
+    ) {
+        Column(
+            modifier = Modifier.padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            TextUiField(
+                value = tasksState.text,
+                onValueChange = { newValue -> tasksState.setContent(newValue) },
+                placeholder = "Edit your task content..."
+            )
+
+            TextUiField(
+                value = tasksState.desc,
+                onValueChange = { newValue -> tasksState.setDescription(newValue) },
+                placeholder = "Edit your task description(optional)..."
+            )
+
+            Row {
+                SquaredUiButton(
+                    onClick = {
+                        updateTaskByIdDialogState = false
+                    }
+                ) { Text(text = "cancel") }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                SquaredUiButton(onClick = {
+                    val id = currentId ?: return@SquaredUiButton
+
+                    if (tasksState.contentNotEmpty()) {
+                        onUpdateTaskById(
+                            id,
+                            tasksState.text,
+                            if (tasksState.descriptionNotEmpty()) tasksState.desc
+                            else null
+                        )
+                        updateTaskByIdDialogState = false
+                    }
+                }) { Text(text = "edit") }
+            }
+        }
+    }
+
+    // tasks lazy list
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues),
+        contentPadding = PaddingValues(horizontal = 5.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        itemsIndexed(
+            items = tasksList,
+            key = { index, task -> task.id }
+        ) { index, task ->
+            TaskUiItem(
+                id = task.id,
+                number = index + 1,
+                task = task.content,
+                state = task.isCompleted,
+                onStateChanged = onTaskStateChanged,
+                onEdit = {
+                    currentTaskId = task.taskId
+                    currentId = task.id
+
+                    tasksState.setContent(task.content)
+                    tasksState.setDescription(task.description ?: "")
+
+                    updateTaskByIdDialogState = true
+                },
+                onDelete = {
+                    currentTaskId = task.taskId
+                    currentId = task.id
+
+                    deleteTaskByIdDialogState = true
+                },
+                description = task.description
+            )
+
+            if (index < tasksList.lastIndex) HorizontalDivider()
+        }
+    }
+}
+
+@Composable
+private fun TasksListDataField(
+    name: String,
+    description: String?
+) {
+    Column {
+        // name
+        Text(
+            text = name,
+            modifier = Modifier.basicMarquee(Int.MAX_VALUE),
+            fontSize = 16.sp,
+            color = MaterialTheme.colorScheme.onPrimary
+        )
+
+        // description (optional)
+        description?.let {
+            Text(
+                text = it,
+                fontWeight = FontWeight.Light,
+                modifier = Modifier.basicMarquee(Int.MAX_VALUE),
+                fontSize = 10.sp,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TasksListViewAppScreen(
+    onNavigateTo: (String) -> Unit,
+    taskId: String?,
+    tasksViewModel: TasksViewModel
+) {
+    LaunchedEffect(Unit) {
+        taskId?.let {
+            tasksViewModel.setTasks(it)
+        }
     }
 
     Scaffold(
@@ -104,7 +276,7 @@ fun TasksListViewAppScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            navigator.navigateTo(NavigationRoutes.MainScreen.route)
+                            onNavigateTo(NavigationRoutes.MainScreen.route)
                         }
                     ) {
                         Icon(
@@ -114,162 +286,51 @@ fun TasksListViewAppScreen(
                     }
                 },
                 title = {
-                    Column {
-                        tasksListHeader?.let { header ->
-                            // name
-                            Text(
-                                text = header.name,
-                                modifier = Modifier.basicMarquee(Int.MAX_VALUE),
-                                fontSize = 16.sp,
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
+                    val tasksListHeader by tasksViewModel.tasksListById.collectAsState()
 
-                            // description (optional)
-                            header.description?.let { text ->
-                                Text(
-                                    text = text,
-                                    fontWeight = FontWeight.Light,
-                                    modifier = Modifier.basicMarquee(Int.MAX_VALUE),
-                                    fontSize = 10.sp,
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
-                            }
-                        }
+                    when (val data = tasksListHeader) {
+                        is TasksListDataResult.ListData ->
+                            TasksListDataField(
+                                name = data.tasksListEntity.name,
+                                description = data.tasksListEntity.description
+                            )
+                        is TasksListDataResult.Loading -> Text(text = "loading...")
+                        else -> {}
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
             )
         }
     ) { innerPadding ->
-        ActionUiDialog(
-            state = deleteTaskByIdDialogState,
-            onDismissRequestFunction = { deleteTaskByIdDialogState = false },
-            containerColor = MaterialTheme.colorScheme.error,
-            titleIcon = painterResource(R.drawable.outline_delete_24),
-            titleText = "Delete Task"
-        ) {
-            Text(
-                text = buildAnnotatedString {
-                    append("Are you sure, want to ")
-                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("delete") }
-                    append(" this tasks list?")
-                }
-            )
+        val tasksList by tasksViewModel.allTasksById.collectAsState()
 
-            Row {
-                SquaredUiButton(
-                    onClick = { deleteTaskByIdDialogState = false },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.onError,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) {
-                    Text(text = "no")
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                SquaredUiButton(
-                    onClick = {
-                        currentTaskId?.let { tasksViewModel.deleteTaskById(it) }
-                        // update all tasks count
-                        tasksListId?.let { tasksViewModel.setAllTasksCountById(it, tasksList.size - 1) }
-                        deleteTaskByIdDialogState = false
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.onError,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) { Text(text = "yes") }
-            }
-        }
-
-        // edit task item dialog
-        ActionUiDialog(
-            state = updateTaskByIdDialogState,
-            onDismissRequestFunction = { updateTaskByIdDialogState = false },
-            titleIcon = painterResource(R.drawable.outline_edit_24),
-            titleText = "Edit task"
-        ) {
-            Column(
-                modifier = Modifier.padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                TextUiField(
-                    value = editContent,
-                    onValueChange = { newValue -> editContent = newValue },
-                    placeholder = "Edit your task content..."
+        when (val list = tasksList) {
+            is TasksResult.ContentList ->
+                TasksListView(
+                    paddingValues = innerPadding,
+                    taskId = taskId,
+                    tasksList = list.tasks,
+                    onTaskStateChanged = tasksViewModel::setTaskStateById,
+                    onDeleteTaskById = tasksViewModel::deleteTaskById,
+                    onSetAllTasksCountById = tasksViewModel::setAllTasksCountById,
+                    onUpdateTaskById = tasksViewModel::updateTaskById,
+                    onSetCompletedTasksCountById = tasksViewModel::setCompletedTasksCountById,
+                    onManageTasksListCompletionStateById = tasksViewModel::manageTasksListCompletionStateById
                 )
-
-                TextUiField(
-                    value = editDescription,
-                    onValueChange = { newValue -> editDescription = newValue },
-                    placeholder = "Edit your task description(optional)..."
+            is TasksResult.Exception ->
+                NoDataUiDescriptionBlock(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    description = list.message
                 )
-
-                Row {
-                    SquaredUiButton(
-                        onClick = {
-                            updateTaskByIdDialogState = false
-                        }
-                    ) { Text(text = "cancel") }
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    SquaredUiButton(onClick = {
-                        val taskId = currentTaskId ?: return@SquaredUiButton
-
-                        if (editContent.isNotEmpty()) {
-                            tasksViewModel.updateTaskById(
-                                taskId,
-                                editContent,
-                                if (editDescription.isNotEmpty()) editDescription
-                                else null
-                            )
-                            updateTaskByIdDialogState = false
-                        }
-                    }) { Text(text = "edit") }
-                }
-            }
-        }
-
-        // tasks lazy list
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 5.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp)
-        ) {
-            itemsIndexed(
-                items = tasksList,
-                key = { index, task -> task.id }
-            ) { index, task ->
-                TaskUiItem(
-                    id = task.id,
-                    number = index + 1,
-                    task = task.content,
-                    state = task.isCompleted,
-                    onStateChanged = onTaskStateChanged,
-                    onEdit = {
-                        currentTaskId = task.id
-                        editContent = task.content
-                        task.description?.let { editDescription = it }
-
-                        updateTaskByIdDialogState = true
-                    },
-                    onDelete = {
-                        currentTaskId = task.id
-                        editContent = task.content
-                        task.description?.let { editDescription = it }
-
-                        deleteTaskByIdDialogState = true
-                    },
-                    description = task.description
+            TasksResult.Loading ->
+                LoadingUiBlock(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    description = "Loading tasks, please wait."
                 )
-
-                if (index < tasksList.lastIndex) HorizontalDivider()
-            }
         }
     }
 }

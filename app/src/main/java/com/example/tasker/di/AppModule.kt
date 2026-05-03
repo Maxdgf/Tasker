@@ -26,9 +26,11 @@ object AppModule {
         ).fallbackToDestructiveMigration(false).build()
 
     @Provides
-    fun tasksDao(tasksDatabase: TasksDatabase): TasksDao = tasksDatabase.getAllTasksDao()
+    fun tasksDao(tasksDatabase: TasksDatabase): TasksDao =
+        tasksDatabase.getAllTasksDao()
 
     @Singleton
     @Provides
-    fun provideTaskRepository(tasksDao: TasksDao): TasksRepository = TasksRepositoryImpl(tasksDao)
+    fun provideTaskRepository(tasksDao: TasksDao): TasksRepository =
+        TasksRepositoryImpl(tasksDao)
 }

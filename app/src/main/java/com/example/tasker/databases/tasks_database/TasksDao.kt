@@ -23,23 +23,23 @@ interface TasksDao {
     @Query("SELECT * FROM tasks_list_table WHERE task_id = :id")
     fun getAllTasksById(id: String): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM tasks_headers_table WHERE id = :id")
-    fun getTasksListById(id: Long): Flow<TasksListEntity>
+    @Query("SELECT * FROM tasks_headers_table WHERE tasksId = :id")
+    fun getTasksListById(id: String): Flow<TasksListEntity?>
 
     @Query("UPDATE tasks_list_table SET task_is_completed = :state WHERE id = :id")
     suspend fun setStateToTaskById(state: Boolean, id: Long)
 
-    @Query("UPDATE tasks_headers_table SET tasks_list_completed_tasks_count = :count WHERE tasks_id = :id")
+    @Query("UPDATE tasks_headers_table SET tasks_list_completed_tasks_count = :count WHERE tasksId = :id")
     suspend fun setCompletedTasksCountById(count: Int, id: String)
 
-    @Query("UPDATE tasks_headers_table SET tasks_list_is_completed_state = :state WHERE tasks_id = :id")
+    @Query("UPDATE tasks_headers_table SET tasks_list_is_completed_state = :state WHERE tasksId = :id")
     suspend fun manageTasksListCompletionStateById(state: Boolean, id: String)
 
     @Query("UPDATE tasks_list_table SET task_content = :content, task_description = :description WHERE id = :id")
     suspend fun updateTaskById(content: String, description: String?, id: Long)
 
-    @Query("UPDATE tasks_headers_table SET tasks_list_tasks_count = :count WHERE id = :id")
-    suspend fun setAllTasksCountById(id: Long, count: Int)
+    @Query("UPDATE tasks_headers_table SET tasks_list_tasks_count = :count WHERE tasksId = :id")
+    suspend fun setAllTasksCountById(id: String, count: Int)
 
     @Query("DELETE FROM tasks_headers_table")
     suspend fun deleteAllTasksHeadersList()
@@ -47,7 +47,7 @@ interface TasksDao {
     @Query("DELETE FROM tasks_list_table")
     suspend fun deleteAllTasksList()
 
-    @Query("DELETE FROM tasks_headers_table WHERE tasks_id = :id")
+    @Query("DELETE FROM tasks_headers_table WHERE tasksId = :id")
     suspend fun deleteTasksListHeaderById(id: String)
 
     @Query("DELETE FROM tasks_list_table WHERE task_id = :id")

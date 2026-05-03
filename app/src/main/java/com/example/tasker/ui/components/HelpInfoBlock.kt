@@ -1,5 +1,6 @@
 package com.example.tasker.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,24 +21,29 @@ import com.example.tasker.R
  * @param text help info.
  */
 @Composable
-fun HelpUiInfoBlock(text: String) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        val color =
-            if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.5f)
-            else Color.Black.copy(alpha = 0.5f)
+fun HelpUiInfoBlock(
+    text: String,
+    visibility: Boolean
+) {
+    AnimatedVisibility(visible = visibility) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            val color =
+                if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.5f)
+                else Color.Black.copy(alpha = 0.5f)
 
-        Icon(
-            painter = painterResource(R.drawable.baseline_info_outline_24),
-            contentDescription = null,
-            tint = color
-        )
+            Icon(
+                painter = painterResource(R.drawable.baseline_info_outline_24),
+                contentDescription = null,
+                tint = color
+            )
 
-        Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
-        Text(
-            text = text,
-            fontStyle = FontStyle.Italic,
-            color = color
-        )
+            Text(
+                text = text,
+                fontStyle = FontStyle.Italic,
+                color = color
+            )
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.example.tasker.ui.screens
 
-import android.os.Parcelable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,7 +28,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -39,7 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 import com.example.tasker.R
 import com.example.tasker.ui.components.HelpUiInfoBlock
@@ -47,29 +45,21 @@ import com.example.tasker.ui.components.NoDataUiDescriptionBlock
 import com.example.tasker.ui.components.ProtoTaskUiItem
 import com.example.tasker.ui.components.SquaredUiButton
 import com.example.tasker.ui.components.TextUiField
-import com.example.tasker.ui.navigation.NavigationRoutes
-import com.example.tasker.ui.navigation.Navigator
+import com.example.tasker.ui.screens.navigation.NavigationRoutes
 import com.example.tasker.ui.viewmodels.TasksViewModel
-import kotlinx.parcelize.Parcelize
+import com.example.tasker.ui.viewmodels.screens.AddedTask
+import com.example.tasker.ui.viewmodels.screens.TasksListCreationScreenViewModel
 import java.util.UUID
-
-@Parcelize
-data class AddedTask(
-    val id: String = UUID.randomUUID().toString(),
-    val taskId: String,
-    val content: String,
-    val description: String? = null
-) : Parcelable
 
 /**
  * Creates tasks list creation screen.
- * @param navigator utility for screen navigation.
+ * @param onNavigateTo navigate to specific screen function.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasksListCreationAppScreen(
-    navigator: Navigator,
-    tasksViewModel: TasksViewModel = hiltViewModel()
+    onNavigateTo: (String) -> Unit,
+    tasksViewModel: TasksViewModel
 ) {
     /**
      * Checks input user data.
@@ -81,13 +71,7 @@ fun TasksListCreationAppScreen(
         }
     }
 
-    // screen states
-    var tasksListName by rememberSaveable { mutableStateOf("") }
-    var tasksListDescription by rememberSaveable { mutableStateOf("") }
-    var task by rememberSaveable { mutableStateOf("") }
-    var taskDescription by rememberSaveable { mutableStateOf("") }
-    val addedTasksList = rememberSaveable { mutableStateListOf<AddedTask>() }
-    val taskId by rememberSaveable { mutableStateOf(UUID.randomUUID().toString()) }
+    var hintsVisibilityState by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -95,12 +79,21 @@ fun TasksListCreationAppScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            navigator.navigateTo(NavigationRoutes.MainScreen.route)
+                            onNavigateTo(NavigationRoutes.MainScreen.route)
                         }
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.outline_arrow_back_24),
                             contentDescription = null
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { hintsVisibilityState = !hintsVisibilityState }) {
+                        Icon(
+                            painter = painterResource(R.drawable.baseline_info_outline_24),
+                            contentDescription = null,
+                            tint = if (hintsVisibilityState) Color.Green else Color.Unspecified
                         )
                     }
                 },
@@ -114,6 +107,7 @@ fun TasksListCreationAppScreen(
             )
         }
     ) { innerPadding ->
+        val listState: TasksListCreationScreenViewModel = viewModel()
         val scrollState = rememberScrollState()
 
         Column(modifier = Modifier.padding(innerPadding)) {
@@ -127,12 +121,15 @@ fun TasksListCreationAppScreen(
                     )
                     .verticalScroll(scrollState)
             ) {
-                HelpUiInfoBlock(text = "Type name and description(optional) of your tasks list.")
+                HelpUiInfoBlock(
+                    text = "Type name and description(optional) of your tasks list.",
+                    visibility = hintsVisibilityState
+                )
 
                 // tasks list name input field
                 TextUiField(
-                    value = tasksListName,
-                    onValueChange = { newValue -> tasksListName = newValue },
+                    value = listState.tListName,
+                    onValueChange = { newValue -> listState.setListName(newValue) },
                     placeholder = "Enter your tasks list name..."
                 )
 
@@ -140,14 +137,17 @@ fun TasksListCreationAppScreen(
 
                 // tasks list description input field
                 TextUiField(
-                    value = tasksListDescription,
-                    onValueChange = { newValue -> tasksListDescription = newValue },
+                    value = listState.tListDescription,
+                    onValueChange = { newValue -> listState.setListDescription(newValue) },
                     placeholder = "Enter your tasks list description... (optional)"
                 )
 
                 Spacer(modifier = Modifier.height(50.dp))
 
-                HelpUiInfoBlock(text = "Add tasks here.")
+                HelpUiInfoBlock(
+                    text = "Add tasks here.",
+                    visibility = hintsVisibilityState
+                )
 
                 // added tasks view
                 Column(
@@ -167,7 +167,8 @@ fun TasksListCreationAppScreen(
                             .weight(1f)
                             .fillMaxWidth()
                     ) {
-                        if (addedTasksList.isNotEmpty())
+                        val addedTasks = listState.addedTasks
+                        if (addedTasks.isNotEmpty())
                             LazyColumn(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -176,7 +177,7 @@ fun TasksListCreationAppScreen(
                                 verticalArrangement = Arrangement.spacedBy(5.dp)
                             ) {
                                 itemsIndexed(
-                                    items = addedTasksList,
+                                    items = addedTasks,
                                     key = { index, task -> task.id }
                                 ) { index, task ->
                                     ProtoTaskUiItem(
@@ -184,11 +185,11 @@ fun TasksListCreationAppScreen(
                                         task = task.content,
                                         description = task.description,
                                         deleteThis = {
-                                            addedTasksList.removeIf { currentTask -> currentTask.id == task.id }
+                                            listState.deleteTaskById(task.id)
                                         }
                                     )
 
-                                    if (index < addedTasksList.lastIndex) HorizontalDivider()
+                                    if (index < addedTasks.lastIndex) HorizontalDivider()
                                 }
                             }
                         else NoDataUiDescriptionBlock(
@@ -205,16 +206,16 @@ fun TasksListCreationAppScreen(
                     ) {
                         Column(modifier = Modifier.weight(0.8f)) {
                             TextUiField(
-                                value = task,
-                                onValueChange = { newValue -> task = newValue },
+                                value = listState.taskText,
+                                onValueChange = { newValue -> listState.setTask(newValue) },
                                 placeholder = "Enter your task..."
                             )
 
                             Spacer(modifier = Modifier.height(5.dp))
 
                             TextUiField(
-                                value = taskDescription,
-                                onValueChange = { newValue -> taskDescription = newValue },
+                                value = listState.taskDesc,
+                                onValueChange = { newValue -> listState.setTaskDescription(newValue) },
                                 placeholder = "Enter your task description... (optional)"
                             )
                         }
@@ -225,19 +226,20 @@ fun TasksListCreationAppScreen(
                         ) {
                             Button(
                                 onClick = {
-                                    if (task.isNotEmpty()) {
-                                        addedTasksList.add(
+                                    if (listState.taskNotEmpty()) {
+                                        listState.addTask(
                                             AddedTask(
-                                                taskId = taskId,
-                                                content = task,
+                                                id = listState.addedTasks.size + 1L,
+                                                content = listState.taskText,
                                                 description =
-                                                    if (taskDescription.isNotEmpty()) taskDescription
+                                                    if (listState.taskDescriptionNotEmpty())
+                                                        listState.taskDesc
                                                     else null
                                             )
                                         )
 
-                                        task = ""
-                                        taskDescription = ""
+                                        listState.setTask("")
+                                        listState.setTaskDescription("")
                                     }
                                 },
                                 modifier = Modifier.fillMaxWidth(),
@@ -250,7 +252,7 @@ fun TasksListCreationAppScreen(
                             }
 
                             Button(
-                                onClick = { addedTasksList.clear() },
+                                onClick = { listState.clearAllTasks() },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(10.dp)
                             ) {
@@ -267,7 +269,10 @@ fun TasksListCreationAppScreen(
             // create tasks list button
             SquaredUiButton(
                 onClick = {
-                    if (checkData(tasksListName, addedTasksList)) {
+                    val addedTasksList = listState.addedTasks
+                    if (checkData(listState.tListName, addedTasksList)) {
+                        val taskId = UUID.randomUUID().toString()
+
                         // add tasks
                         addedTasksList.forEach { task ->
                             tasksViewModel.addTask(taskId, task.content, task.description)
@@ -276,12 +281,14 @@ fun TasksListCreationAppScreen(
                         // add tasks list header
                         tasksViewModel.addTasksList(
                             taskId,
-                            tasksListName,
-                            if (tasksListDescription.isNotEmpty()) tasksListDescription else null,
+                            listState.tListName,
+                            if (listState.tListDescription.isNotEmpty())
+                                listState.tListDescription
+                            else null,
                             addedTasksList.count()
                         )
 
-                        navigator.navigateTo(NavigationRoutes.MainScreen.route) // navigate to main screen
+                        onNavigateTo(NavigationRoutes.MainScreen.route) // navigate to main screen
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),

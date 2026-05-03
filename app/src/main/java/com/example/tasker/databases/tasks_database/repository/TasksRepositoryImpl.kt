@@ -7,19 +7,26 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class TasksRepositoryImpl @Inject constructor(private val tasksDao: TasksDao) : TasksRepository {
-    override fun getAllTasks(): Flow<List<TasksListEntity>> = tasksDao.getAllTasksLists()
+    override fun getAllTasks(): Flow<List<TasksListEntity>> =
+        tasksDao.getAllTasksLists()
 
-    override fun getTasksListById(id: Long): Flow<TasksListEntity> = tasksDao.getTasksListById(id)
+    override fun getTasksListById(id: String): Flow<TasksListEntity?> =
+        tasksDao.getTasksListById(id)
 
-    override suspend fun addTasksList(tasksList: TasksListEntity) = tasksDao.addTasksList(tasksList)
+    override suspend fun addTasksList(tasksList: TasksListEntity) =
+        tasksDao.addTasksList(tasksList)
 
-    override suspend fun addTask(task: TaskEntity) = tasksDao.addTask(task)
+    override suspend fun addTask(task: TaskEntity) =
+        tasksDao.addTask(task)
 
-    override fun getAllTasksById(id: String): Flow<List<TaskEntity>> = tasksDao.getAllTasksById(id)
+    override fun getAllTasksById(id: String): Flow<List<TaskEntity>> =
+        tasksDao.getAllTasksById(id)
 
-    override suspend fun setStateToTaskById(state: Boolean, id: Long) = tasksDao.setStateToTaskById(state, id)
+    override suspend fun setStateToTaskById(state: Boolean, id: Long) =
+        tasksDao.setStateToTaskById(state, id)
 
-    override suspend fun setCompletedTasksCountById(count: Int, id: String) = tasksDao.setCompletedTasksCountById(count, id)
+    override suspend fun setCompletedTasksCountById(count: Int, id: String) =
+        tasksDao.setCompletedTasksCountById(count, id)
 
     override suspend fun manageTasksListCompletionStateById(
         state: Boolean,
@@ -32,11 +39,15 @@ class TasksRepositoryImpl @Inject constructor(private val tasksDao: TasksDao) : 
         id: Long
     ) = tasksDao.updateTaskById(content, description, id)
 
-    override suspend fun setAllTasksCountById(id: Long, count: Int) = tasksDao.setAllTasksCountById(id, count)
+    override suspend fun setAllTasksCountById(id: String, count: Int) =
+        tasksDao.setAllTasksCountById(id, count)
 
-    override suspend fun deleteTaskById(id: Long) = tasksDao.deleteTaskById(id)
+    override suspend fun deleteTaskById(id: Long) =
+        tasksDao.deleteTaskById(id)
 
-    override suspend fun deleteAllData() = tasksDao.deleteAllData()
+    override suspend fun deleteAllData() =
+        tasksDao.deleteAllData()
 
-    override suspend fun deleteAllTasksById(id: String) = tasksDao.deleteAllTasksById(id)
+    override suspend fun deleteAllTasksById(id: String) =
+        tasksDao.deleteAllTasksById(id)
 }

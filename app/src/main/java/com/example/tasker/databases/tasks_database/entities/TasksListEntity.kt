@@ -6,8 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "tasks_headers_table")
 data class TasksListEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0, // primary key
-    @ColumnInfo(name = "tasks_id") val tasksId: String, // tasks id (uuid4)
+    @PrimaryKey val tasksId: String, // tasks id (uuid4)
     @ColumnInfo(name = "tasks_list_name") val name: String, // name of tasks list
     @ColumnInfo(name = "tasks_list_description") val description: String? = null, // description of tasks list (optional)
     @ColumnInfo(name = "tasks_list_created_at") val time: Long = System.currentTimeMillis(), // datetime of creation
