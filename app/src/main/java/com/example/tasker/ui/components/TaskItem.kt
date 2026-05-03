@@ -23,6 +23,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -87,14 +88,18 @@ fun TaskUiItem(
                 text = task,
                 style =
                     if (state) TextStyle(textDecoration = TextDecoration.LineThrough)
-                    else TextStyle.Default // line through text if task completed
+                    else TextStyle.Default, // line through text if task completed
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
             description?.let {
                 Text(
                     text = it,
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Light
+                    maxLines = 1,
+                    fontWeight = FontWeight.Light,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }

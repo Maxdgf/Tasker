@@ -1,6 +1,5 @@
 package com.example.tasker.ui.components
 
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,6 +25,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tasker.R
@@ -102,7 +102,8 @@ fun TasksListHeaderUiItem(
                 Text(
                     text = name,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.basicMarquee(Int.MAX_VALUE),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     style =
                         if (isCompleted) TextStyle(textDecoration = TextDecoration.LineThrough)
                         else TextStyle.Default // line through text if tasks list completed
@@ -113,7 +114,8 @@ fun TasksListHeaderUiItem(
                         text = it,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Light,
-                        modifier = Modifier.basicMarquee(Int.MAX_VALUE)
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 

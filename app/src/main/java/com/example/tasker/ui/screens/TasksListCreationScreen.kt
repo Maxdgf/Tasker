@@ -84,7 +84,8 @@ fun TasksListCreationAppScreen(
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.outline_arrow_back_24),
-                            contentDescription = null
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 },
@@ -93,7 +94,7 @@ fun TasksListCreationAppScreen(
                         Icon(
                             painter = painterResource(R.drawable.baseline_info_outline_24),
                             contentDescription = null,
-                            tint = if (hintsVisibilityState) Color.Green else Color.Unspecified
+                            tint = if (hintsVisibilityState) Color.Green else MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 },

@@ -32,6 +32,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,7 +69,6 @@ private fun TasksListView(
 
     var currentId: Long? by rememberSaveable { mutableStateOf(0L) }
     var currentTaskId: String? by rememberSaveable { mutableStateOf(null) }
-    var updateTaskByIdDialogState by rememberSaveable { mutableStateOf(false) }
     var deleteTaskByIdDialogState by rememberSaveable { mutableStateOf(false) }
     var isScreenHasJustStarted by rememberSaveable { mutableStateOf(false) }
 
@@ -142,8 +142,8 @@ private fun TasksListView(
 
     // edit task item dialog
     ActionUiDialog(
-        state = updateTaskByIdDialogState,
-        onDismissRequestFunction = { updateTaskByIdDialogState = false },
+        state = tasksState.updateTaskByIdDialogState,
+        onDismissRequestFunction = { tasksState.setUpdateDialogState(false) },
         titleIcon = painterResource(R.drawable.outline_edit_24),
         titleText = "Edit task"
     ) {
@@ -164,11 +164,9 @@ private fun TasksListView(
             )
 
             Row {
-                SquaredUiButton(
-                    onClick = {
-                        updateTaskByIdDialogState = false
-                    }
-                ) { Text(text = "cancel") }
+                SquaredUiButton(onClick = { tasksState.setUpdateDialogState(false) }) {
+                    Text(text = "cancel")
+                }
 
                 Spacer(modifier = Modifier.weight(1f))
 
@@ -182,7 +180,8 @@ private fun TasksListView(
                             if (tasksState.descriptionNotEmpty()) tasksState.desc
                             else null
                         )
-                        updateTaskByIdDialogState = false
+
+                        tasksState.setUpdateDialogState(false)
                     }
                 }) { Text(text = "edit") }
             }
@@ -214,7 +213,7 @@ private fun TasksListView(
                     tasksState.setContent(task.content)
                     tasksState.setDescription(task.description ?: "")
 
-                    updateTaskByIdDialogState = true
+                    tasksState.setUpdateDialogState(true)
                 },
                 onDelete = {
                     currentTaskId = task.taskId
@@ -249,9 +248,10 @@ private fun TasksListDataField(
             Text(
                 text = it,
                 fontWeight = FontWeight.Light,
-                modifier = Modifier.basicMarquee(Int.MAX_VALUE),
+                maxLines = 1,
                 fontSize = 10.sp,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onPrimary,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -281,7 +281,8 @@ fun TasksListViewAppScreen(
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.outline_arrow_back_24),
-                            contentDescription = null
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 },
@@ -295,6 +296,7 @@ fun TasksListViewAppScreen(
                                 description = data.tasksListEntity.description
                             )
                         is TasksListDataResult.Loading -> Text(text = "loading...")
+                        is TasksListDataResult.Exception -> Text(text = "error")
                         else -> {}
                     }
                 },

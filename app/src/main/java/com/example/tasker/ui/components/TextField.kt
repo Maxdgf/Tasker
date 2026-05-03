@@ -24,7 +24,7 @@ fun TextUiField(
     placeholder: String
 ) {
     OutlinedTextField(
-        maxLines = 1,
+        singleLine = true,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 5.dp),
